@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self';">
+    <title>PRRD & POE App - Gestión del Riesgo y Emergencias</title>
+
+    <!-- PWA & Metadatos -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <meta name="theme-color" content="#002b7f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PRRD & POE">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        chileRed: '#d52b1e',
+                        chileBlue: '#002b7f',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; font-size: 9pt !important; padding: 0 !important; margin: 0 !important; color: black !important; }
+            #section-poe, #section-directorio, #section-grave, #section-centro, #section-amenazas, #section-simulacros {
+                display: block !important;
+                page-break-inside: auto;
+            }
+            .poe-card-print {
+                page-break-inside: avoid;
+                border: 1px solid #cbd5e1 !important;
+                margin-bottom: 8px !important;
+            }
+            @page {
+                size: letter;
+                margin: 12mm;
+            }
+        }
+        .strobe-active {
+            animation: strobe 0.4s infinite alternate;
+        }
+        @keyframes strobe {
+            0% { background-color: #d52b1e; }
+            100% { background-color: #ffffff; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .strobe-active {
+                animation: none;
+                background-color: #d52b1e;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+            outline: 3px solid #38bdf8;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans min-h-screen antialiased pb-16 selection:bg-red-500 selection:text-white">
+
+    <!-- Región viva para lectores de pantalla -->
+    <div id="sr-live-region" class="sr-only" aria-live="assertive" aria-atomic="true" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;"></div>
+
+    <!-- ========================================================================= -->
+    <!-- NAVEGACIÓN SUPERIOR FIJA -->
+    <!-- ========================================================================= -->
+    <header class="no-print bg-slate-950 text-white sticky top-0 z-50 border-b border-slate-800 shadow-xl">
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
+
+            <!-- LOGO & TÍTULO -->
+            <div class="flex items-center gap-2.5">
+                <div class="bg-chileRed text-white p-2 rounded-xl font-extrabold text-base flex items-center justify-center w-9 h-9 shadow-lg shadow-red-900/40">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-sm sm:text-base leading-tight flex items-center gap-1.5">
+                        PRRD & POE APP <span class="bg-chileBlue text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Chile</span>
+                    </h1>
+                    <p class="text-[10px] text-slate-400">Ley N° 21.364 · D.S. N° 44 · D.S. N° 594 · Circ. N° 3333</p>
+                </div>
+            </div>
+
+            <!-- MODOS DE NAVEGACIÓN -->
+            <nav class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-semibold overflow-x-auto max-w-full">
+                <button id="nav-poe" onclick="switchMainSection('poe')" class="px-3 py-1.5 rounded-lg bg-chileBlue text-white transition flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-bolt-lightning text-amber-400"></i> <span>POE AIDEP & ACCEDER</span>
+                </button>
+                <button id="nav-sos" onclick="switchMainSection('sos')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> <span>Panel SOS & Estado</span>
+                </button>
+                <button id="nav-directorio" onclick="switchMainSection('directorio')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-phone text-emerald-400"></i> <span>Directorio 24/7</span>
+                </button>
+                <button id="nav-grave" onclick="switchMainSection('grave')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-person-falling-burst text-rose-400"></i> <span>Accidente Grave</span>
+                </button>
+                <button id="nav-centro" onclick="switchMainSection('centro')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-building text-blue-400"></i> <span>Ficha CGRD</span>
+                </button>
+                <button id="nav-drill" onclick="switchMainSection('drill')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-stopwatch text-cyan-400"></i> <span>Simulacro</span>
+                </button>
+            </nav>
+
+            <!-- ACCIONES RÁPIDAS -->
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-pdf text-red-400"></i> <span class="hidden md:inline">Imprimir PDF</span>
+                </button>
+                <a href="tel:6004200022" class="bg-chileRed hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-red-950/50">
+                    <i class="fa-solid fa-phone-volume"></i> <span class="hidden sm:inline">SUSESO:</span> 600 42 000 22
+                </a>
+            </div>
+        </div>
+
+        <!-- BANNER DE ESTADO PERSISTENTE -->
+        <div id="global-status-banner" class="no-print hidden border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold">
+            <i id="global-status-icon" class="fa-solid"></i>
+            <span id="global-status-text"></span>
+        </div>
+    </header>
+
+    <!-- NOTIFICACIÓN TOAST -->
+    <div id="toast" role="status" aria-live="polite" class="no-print fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-blue-400 text-base"></i>
+        <span id="toast-message">Notificación</span>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN DE MENSAJE -->
+    <div id="message-preview-modal" class="no-print hidden fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="message-preview-title">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 max-w-sm w-full text-white space-y-3.5 shadow-2xl">
+            <div id="message-preview-title" class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                <i class="fa-solid fa-eye"></i> Revisa el mensaje antes de enviarlo
+            </div>
+            <div id="message-preview-recipient" class="text-xs text-slate-400"></div>
+            <div id="message-preview-text" class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 whitespace-pre-wrap leading-relaxed"></div>
+            <div id="message-preview-location-note" class="text-[11px] text-amber-300 flex items-start gap-1.5"></div>
+            <div class="flex items-center gap-2 pt-1">
+                <button id="message-preview-cancel" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs transition">
+                    Cancelar
+                </button>
+                <button id="message-preview-confirm" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                    Confirmar y Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4">
+
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 1: PROCEDIMIENTOS OPERATIVOS ESTANDARIZADOS (18 POES) -->
+        <!-- ========================================================================= -->
+        <section id="section-poe" class="space-y-4">
+            
+            <!-- BUSCADOR & FILTROS -->
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 shadow-xl flex flex-col md:flex-row gap-3 items-center justify-between no-print">
+                <div class="relative w-full md:w-96">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                    <input type="text" id="poeSearch" onkeyup="filterPoes()" placeholder="Buscar amenaza, POE o palabra clave..." class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500">
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap w-full md:w-auto text-xs">
+                    <button onclick="filterCategory('todos', event)" class="cat-btn px-3 py-1.5 bg-chileBlue text-white rounded-lg font-bold shadow-xs">Todos (18)</button>
+                    <button onclick="filterCategory('Geológico', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Geológico</button>
+                    <button onclick="filterCategory('Incendio', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Incendio</button>
+                    <button onclick="filterCategory('Químico', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Químico / Ind.</button>
+                    <button onclick="filterCategory('Meteorológico', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Meteorológico</button>
+                    <button onclick="filterCategory('Antrópico', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Seguridad / Salud</button>
+                </div>
+            </div>
+
+            <!-- GRILLA DINÁMICA POE -->
+            <div id="poeGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Se inyecta mediante JS -->
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 2: PANEL SOS, HERRAMIENTAS Y ESTADO PERSONAL -->
+        <!-- ========================================================================= -->
+        <section id="section-sos" class="hidden space-y-5">
+
+            <!-- ESTADO PERSONAL LOCAL -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white shadow-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Estado Personal Operativo</span>
+                        </div>
+                        <h2 class="text-xl font-black">Mi Estado en Emergencia</h2>
+                        <p class="text-xs text-slate-400">Selecciona tu condición y notifica directamente a tu contacto o líder de evacuación por SMS o WhatsApp sin servidores intermedios.</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                        <button id="btn-status-safe" onclick="setUserStatus('safe')" class="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow">
+                            <i class="fa-solid fa-shield-heart"></i> Estoy a Salvo
+                        </button>
+                        <button id="btn-status-help" onclick="setUserStatus('help')" class="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-bold text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-hand-holding-medical"></i> Necesito Ayuda
+                        </button>
+                    </div>
+                </div>
+
+                <div id="phone-warning" class="hidden mt-3 bg-amber-950/60 border border-amber-800/60 text-amber-300 rounded-xl p-2.5 text-[11px] flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation shrink-0"></i>
+                    <span>No has registrado un contacto de emergencia. Complétalo en la ficha del centro / hogar para habilitar envíos rápidos.</span>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-share-nodes text-slate-500"></i>
+                        <span id="status-share-hint">Selecciona un estado arriba para poder avisarle a tu contacto.</span>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button id="btn-call-contact" onclick="callEmergencyContact()" class="hidden px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition items-center justify-center gap-2 animate-pulse">
+                            <i class="fa-solid fa-phone"></i> Llamar al Contacto Ahora
+                        </button>
+                        <button id="btn-share-sms" onclick="shareStatus('sms')" disabled class="px-3 py-2 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
+                            <i class="fa-solid fa-comment-sms"></i> Enviar por SMS
+                        </button>
+                        <button id="btn-share-whatsapp" onclick="shareStatus('whatsapp')" disabled class="px-3 py-2 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
+                            <i class="fa-brands fa-whatsapp"></i> Enviar por WhatsApp
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HERRAMIENTAS ACTIVAS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <!-- SIRENA & SILBATO -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-red-400 uppercase tracking-wider"><i class="fa-solid fa-bullhorn mr-1"></i> Auxilio Sonoro</span>
+                            <span class="text-[10px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800/50">Web Audio API</span>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-100">Sirena & Silbato SOS</h3>
+                        <p class="text-xs text-slate-400 mt-1">Emite frecuencias de 600-1200Hz o silbato de 2800Hz para localización bajo escombros o en naves oscuras.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button id="btn-siren" onclick="toggleSiren()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-red-900/30">
+                            <i class="fa-solid fa-volume-high"></i> <span id="lbl-siren">Activar Sirena</span>
+                        </button>
+                        <button id="btn-whistle" onclick="toggleWhistle()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-amber-900/30">
+                            <i class="fa-solid fa-mattress-pillow"></i> <span id="lbl-whistle">Silbato SOS</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- GPS & COORDENADAS -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-location-dot mr-1"></i> GPS & SMS</span>
+                            <span class="text-[10px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800/50">Sin Datos Móviles</span>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-100">Enviar Ubicación GPS</h3>
+                        <p class="text-xs text-slate-400 mt-1">Captura coordenadas satelitales y genera enlace directo de Google Maps vía mensajería SMS celular.</p>
+                    </div>
+                    <div class="space-y-2 pt-2">
+                        <div class="flex items-center gap-2 text-[11px] bg-slate-900 p-2 rounded-lg border border-slate-800 text-slate-300 font-mono">
+                            <span class="truncate flex-1" id="gps-display">GPS: No localizado</span>
+                            <button type="button" onclick="initGeolocation()" title="Actualizar ubicación" class="shrink-0 px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                        </div>
+                        <button onclick="sendEmergencySMS()" class="w-full bg-chileBlue hover:bg-blue-600 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-blue-900/30">
+                            <i class="fa-solid fa-paper-plane"></i> Generar SMS con Coordenadas
+                        </button>
+                    </div>
+                </div>
+
+                <!-- LUZ DE ESTROBO / SÍNTESIS DE VOZ -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg" id="strobe-container">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-headset mr-1"></i> Voz & Destello</span>
+                            <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800/50">Asistencia Visual</span>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-100">Guía Audible / Estrobo</h3>
+                        <p class="text-xs text-slate-400 mt-1">Reproduce pasos críticos por sintetizador de voz o activa destello de pantalla para señalización nocturna.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button id="btn-tts" onclick="speakEmergencySteps()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-volume-low"></i> <span id="lbl-tts">Guía Audible</span>
+                        </button>
+                        <button id="btn-strobe" onclick="toggleStrobe()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-bolt"></i> <span>Estrobo SOS</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- KIT DE EMERGENCIA 72H INTERACTIVO -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white space-y-4 shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 class="font-bold text-base flex items-center gap-2 text-slate-100">
+                        <i class="fa-solid fa-suitcase-rolling text-amber-400"></i> Checklist Kit de Emergencia 72 Horas
+                    </h3>
+                    <span id="app-kit-counter" class="text-xs font-bold text-amber-400 bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-800/50">0 / 9 Listos</span>
+                </div>
+
+                <div class="w-full bg-slate-900 rounded-full h-2.5 border border-slate-800 overflow-hidden">
+                    <div id="app-kit-bar" class="bg-amber-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="agua" onchange="syncKitCheckboxes()">
+                        <span>💧 Agua (2L/pers/día)</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="comida" onchange="syncKitCheckboxes()">
+                        <span>🥫 Raciones No Perecibles</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="linterna" onchange="syncKitCheckboxes()">
+                        <span>🔦 Linterna LED / Dínamo</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="radio" onchange="syncKitCheckboxes()">
+                        <span>📻 Radio Portátil AM/FM</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="botiquin" onchange="syncKitCheckboxes()">
+                        <span>🩹 Botiquín & Inmovilizadores</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="llaves" onchange="syncKitCheckboxes()">
+                        <span>🔑 Llaves matrices y candados</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="documentos" onchange="syncKitCheckboxes()">
+                        <span>📋 Planos, HDS & Nóminas</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="mascota" onchange="syncKitCheckboxes()">
+                        <span>🐾 Mascota / Insumos brigada</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700 sm:col-span-2 md:col-span-1">
+                        <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="herramientas" onchange="syncKitCheckboxes()">
+                        <span>🛠️ Manta térmica, navaja y silbato</span>
+                    </label>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 3: DIRECTORIO TELEFÓNICO OFICIAL 24/7 -->
+        <!-- ========================================================================= -->
+        <section id="section-directorio" class="hidden space-y-4">
+            <div class="bg-slate-950 rounded-2xl border border-slate-800 shadow-xl overflow-hidden text-white">
+                <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                    <div>
+                        <h2 class="font-black text-sm sm:text-base uppercase flex items-center gap-2 text-white">
+                            <i class="fa-solid fa-phone-volume text-chileRed"></i> Directorio Telefónico Oficial de Emergencias
+                        </h2>
+                        <p class="text-xs text-slate-400">Líneas de discado rápido 24/7 para el territorio nacional.</p>
+                    </div>
+                    <span class="text-xs font-bold text-blue-300 bg-blue-950 px-2.5 py-1 rounded-lg border border-blue-800/50 hidden sm:inline">Chile</span>
+                </div>
+                
+                <div class="divide-y divide-slate-800/80 text-xs">
+                    
+                    <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-red-950 text-red-400 border border-red-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-fire-extinguisher"></i></div>
+                            <div>
+                                <h3 class="font-bold text-slate-100 text-sm">Cuerpo de Bomberos de Chile</h3>
+                                <p class="text-slate-400">Extinción de incendios, rescate vehicular/estructural, control de fugas de gas y HAZMAT.</p>
+                            </div>
+                        </div>
+                        <a href="tel:132" class="px-5 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 shadow-md shadow-red-950">
+                            <i class="fa-solid fa-phone"></i> 132
+                        </a>
+                    </div>
+
+                    <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-truck-medical"></i></div>
+                            <div>
+                                <h3 class="font-bold text-slate-100 text-sm">SAMU (Ambulancias)</h3>
+                                <p class="text-slate-400">Atención médica prehospitalaria con riesgo vital y soporte avanzado de reanimación.</p>
+                            </div>
+                        </div>
+                        <a href="tel:131" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 shadow-md shadow-emerald-950">
+                            <i class="fa-solid fa-phone"></i> 131
+                        </a>
+                    </div>
+
+                    <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-950 text-blue-400 border border-blue-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div>
+                                <h3 class="font-bold text-slate-100 text-sm">Carabineros de Chile</h3>
+                                <p class="text-slate-400">Asaltos, delitos en curso, control del orden público, resguardo perimetral y cortes de tránsito.</p>
+                            </div>
+                        </div>
+                        <a href="tel:133" class="px-5 py-2 bg-chileBlue hover:bg-blue-600 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 shadow-md shadow-blue-950">
+                            <i class="fa-solid fa-phone"></i> 133
+                        </a>
+                    </div>
+
+                    <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-900 text-slate-300 border border-slate-700 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-user-secret"></i></div>
+                            <div>
+                                <h3 class="font-bold text-slate-100 text-sm">PDI (Policía de Investigaciones)</h3>
+                                <p class="text-slate-400">Peritajes criminalísticos, investigación de delitos graves, sabotajes y atentados.</p>
+                            </div>
+                        </div>
+                        <a href="tel:134" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 border border-slate-700">
+                            <i class="fa-solid fa-phone"></i> 134
+                        </a>
+                    </div>
+
+                    <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-hospital"></i></div>
+                            <div>
+                                <h3 class="font-bold text-slate-100 text-sm">Mutualidades (Ley N° 16.744)</h3>
+                                <p class="text-slate-400">Rescate médico de trabajadores en faena y derivación de urgencia.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap shrink-0">
+                            <a href="tel:1404" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs">ACHS: 1404</a>
+                            <a href="tel:1407" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs">Mutual: 1407</a>
+                            <a href="tel:1400" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs">IST: 1400</a>
+                        </div>
+                    </div>
+
+                    <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-red-950/40 hover:bg-red-950/60 transition">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-red-900 text-red-200 border border-red-700 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div>
+                                <h3 class="font-bold text-red-200 text-sm">Call Center Notificación Accidente Grave / Fatal</h3>
+                                <p class="text-red-300">Plataforma telefónica única nacional obligatoria para informar suspensiones a DT y SEREMI.</p>
+                            </div>
+                        </div>
+                        <a href="tel:6004200022" class="px-5 py-2 bg-chileRed hover:bg-red-600 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-red-950 animate-pulse">
+                            <i class="fa-solid fa-phone"></i> 600 42 000 22
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 4: PROTOCOLO ACCIDENTE GRAVE O FATAL (CIRCULAR N° 3333) -->
+        <!-- ========================================================================= -->
+        <section id="section-grave" class="hidden space-y-4">
+            <div class="bg-slate-950 border-2 border-red-800/80 rounded-2xl p-6 text-white shadow-2xl space-y-5">
+                <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+                    <div class="p-3 bg-red-600 text-white rounded-xl shadow-lg shadow-red-900/50 text-xl">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-black text-red-400 tracking-tight">PROTOCOLO ANTE ACCIDENTES GRAVES O FATALES</h2>
+                        <p class="text-xs text-slate-400 font-medium">Circular N° 3333 SUSESO • Artículo 76 Ley N° 16.744 • Artículo 184 bis Código del Trabajo</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+                    
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between space-y-2">
+                        <div>
+                            <span class="w-6 h-6 rounded-full bg-red-600 text-white font-bold inline-flex items-center justify-center mb-2">1</span>
+                            <h4 class="font-bold text-slate-100 mb-1">Atención Inmediata</h4>
+                            <p class="text-slate-400 leading-relaxed">Primeros auxilios in situ, maniobra RCP y uso de DEA si aplica. Traslado prioritario vía SAMU (131) o Mutualidad.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between space-y-2">
+                        <div>
+                            <span class="w-6 h-6 rounded-full bg-red-600 text-white font-bold inline-flex items-center justify-center mb-2">2</span>
+                            <h4 class="font-bold text-slate-100 mb-1">Suspensión de Faenas</h4>
+                            <p class="text-slate-400 leading-relaxed">Paralización inmediata del área o faena completa y evacuación de trabajadores ante riesgo residual.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between space-y-2">
+                        <div>
+                            <span class="w-6 h-6 rounded-full bg-red-600 text-white font-bold inline-flex items-center justify-center mb-2">3</span>
+                            <h4 class="font-bold text-slate-100 mb-1">Resguardo del Sitio</h4>
+                            <p class="text-slate-400 leading-relaxed">Prohibición absoluta de alterar, mover maquinarias o limpiar el sitio del suceso previo a peritajes.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between space-y-2">
+                        <div>
+                            <span class="w-6 h-6 rounded-full bg-red-600 text-white font-bold inline-flex items-center justify-center mb-2">4</span>
+                            <h4 class="font-bold text-slate-100 mb-1">Notificación Obligatoria</h4>
+                            <p class="text-slate-400 leading-relaxed">Llamar de inmediato a <strong>600 42 000 22</strong> para informar simultáneamente a la DT, SEREMI de Salud y Mutualidad.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between space-y-2">
+                        <div>
+                            <span class="w-6 h-6 rounded-full bg-red-600 text-white font-bold inline-flex items-center justify-center mb-2">5</span>
+                            <h4 class="font-bold text-slate-100 mb-1">Investigación & Cierre</h4>
+                            <p class="text-slate-400 leading-relaxed">Investigación técnica conjunta CPHS y SST. La reanudación requiere acreditación fiscalizadora.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 5: FICHA DEL CENTRO & COMITÉ CGRD -->
+        <!-- ========================================================================= -->
+        <section id="section-centro" class="hidden space-y-5">
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white shadow-xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="text-base font-bold text-slate-100 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-building-circle-check text-blue-400"></i> Identificación del Centro de Trabajo y Estructura CGRD
+                    </h2>
+                    <span class="text-xs text-slate-400">Guardado local seguro</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold" for="app-input-address">🏢 Razón Social / Empresa:</label>
+                        <input type="text" id="app-input-address" maxlength="120" oninput="saveCentroData()" placeholder="Ej: Empresa / Faena S.A." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold" for="app-input-commune">📍 Comuna / Región:</label>
+                        <input type="text" id="app-input-commune" maxlength="80" oninput="saveCentroData()" placeholder="Ej: Rancagua, Región de O'Higgins" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold" for="app-input-meeting">🔲 Punto de Encuentro / Zona Segura:</label>
+                        <input type="text" id="app-input-meeting" maxlength="120" oninput="saveCentroData()" placeholder="Ej: Patio central / Zona exterior señalizada" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold" for="app-input-safezone">🛡️ Coordinador General PRRD (24/7):</label>
+                        <input type="text" id="app-input-safezone" maxlength="120" oninput="saveCentroData()" placeholder="Ej: Juan Pérez - Jefe Turno" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold" for="app-input-contact">📞 Experto Prevención / SST:</label>
+                        <input type="text" id="app-input-contact" maxlength="80" oninput="saveCentroData()" placeholder="Ej: Registro SNS / SEREMI N° 1234" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1 font-semibold" for="app-input-phone">📱 Teléfono Contacto Emergencia:</label>
+                        <input type="tel" id="app-input-phone" maxlength="20" oninput="saveCentroData()" placeholder="+56 9 1234 5678" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <h3 class="text-xs font-bold text-slate-300 uppercase mt-4 mb-2">Cadena de Mando y Roles Operativos en Emergencia</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                    <div class="p-3 bg-blue-950/40 border border-blue-800/50 rounded-xl">
+                        <h4 class="font-bold text-blue-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-user-tie text-blue-400"></i> Comandante de Incidente</h4>
+                        <p class="text-slate-400">Máxima autoridad. Declara alerta/alarma, ordena desalojos y es portavoz ante Bomberos y SENAPRED.</p>
+                    </div>
+                    <div class="p-3 bg-amber-950/40 border border-amber-800/50 rounded-xl">
+                        <h4 class="font-bold text-amber-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-person-walking-arrow-right text-amber-400"></i> Monitores de Evacuación</h4>
+                        <p class="text-slate-400">Verifican barrido de recintos, guían vías de escape y realizan censo nominal en la Zona de Seguridad.</p>
+                    </div>
+                    <div class="p-3 bg-red-950/40 border border-red-800/50 rounded-xl">
+                        <h4 class="font-bold text-red-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-fire-extinguisher text-red-400"></i> Brigada de Intervención</h4>
+                        <p class="text-slate-400">Corte preventivo de matrices (gas, luz, agua) y combate de conatos con extintores portátiles.</p>
+                    </div>
+                    <div class="p-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl">
+                        <h4 class="font-bold text-emerald-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-heart-pulse text-emerald-400"></i> Brigada Primeros Auxilios</h4>
+                        <p class="text-slate-400">Atención prehospitalaria, soporte RCP, aplicación de DEA (Ley 21.156) y contención de crisis.</p>
+                    </div>
+                    <div class="p-3 bg-purple-950/40 border border-purple-800/50 rounded-xl sm:col-span-2 lg:col-span-2">
+                        <h4 class="font-bold text-purple-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-wheelchair text-purple-400"></i> Asistencia PcD (Movilidad Reducida)</h4>
+                        <p class="text-slate-400">Asignación 1:1 («sistema de parejas») para asistir, guiar o trasladar a personas con limitaciones motrices o sensoriales hacia la Zona de Seguridad.</p>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                    <span class="text-[10px] text-slate-500">¿Usas este equipo en faena compartida? Borra los datos al terminar el turno.</span>
+                    <button onclick="clearLocalData()" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-red-900/60 text-slate-300 hover:text-red-300 border border-slate-700 font-bold text-[10px] transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-can"></i> Borrar Datos
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 6: SIMULACRO GUIADO POR VOZ -->
+        <!-- ========================================================================= -->
+        <section id="section-drill" class="hidden space-y-5 max-w-2xl mx-auto">
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-white text-center space-y-4 shadow-2xl">
+                <div class="inline-block bg-emerald-950 text-emerald-400 border border-emerald-800/50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                    Cronómetro Operativo de Ensayo
+                </div>
+
+                <h2 class="text-2xl font-black">Simulacro de Emergencia en Faena</h2>
+                <p class="text-xs text-slate-400">Inicia un temporizador de 60 segundos con instrucciones de voz automatizadas para medir tiempos de reacción y desalojo.</p>
+
+                <div class="py-6 my-2 bg-slate-900 rounded-2xl border border-slate-800">
+                    <span id="drill-timer" class="text-6xl font-black font-mono text-amber-400">00:60</span>
+                    <p id="drill-instruction" class="text-sm font-bold text-slate-300 mt-3" aria-live="polite">Presiona "Iniciar Simulacro" para comenzar</p>
+                </div>
+
+                <div class="flex items-center justify-center gap-3">
+                    <button id="btn-start-drill" onclick="startDrill()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-900/40">
+                        <i class="fa-solid fa-play mr-1.5"></i> Iniciar Simulacro
+                    </button>
+                    <button onclick="resetDrill()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-3 rounded-xl text-xs transition">
+                        Reiniciar
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="no-print bg-slate-950 text-slate-500 text-[11px] py-4 border-t border-slate-800 text-center">
+        <div class="max-w-7xl mx-auto px-4">
+            Plan PRRD & Procedimientos POE • Cumplimiento Normativo Ley N° 21.364, D.S. N° 44 y D.S. N° 594
+        </div>
+    </footer>
+
+    <!-- ========================================================================= -->
+    <!-- LOGICA JAVASCRIPT UNIFICADA -->
+    <!-- ========================================================================= -->
+    <script>
+        // 18 PLANES POE OFICIALES
+        const poesData = [
+            {
+                id: 1,
+                title: "SISMOS DE MAYOR INTENSIDAD Y TERREMOTOS",
+                norma: "NCh433 / SENAPRED",
+                cat: "Geológico",
+                prep: "Anclaje sismorresistente obligatorio de racks, estanterías y archivadores > 1.2 m con pernos de expansión. Láminas de seguridad certificadas (mín. 100 micras) en ventanales. Líneas de vida secundarias en luminarias.",
+                dur: "Mantener la calma; ejecutar técnica 'Agacharse, Cubrirse y Afirmarse' bajo mobiliario reforzado o pilares. Alejarse de vidrios. PROHIBICIÓN TOTAL: No usar ascensores ni escaleras durante el movimiento.",
+                rec: "Al cesar, ordenar evacuación continua a Zona de Seguridad. Monitores cortan gas y electricidad. Censo nominal de personal y prohibición de reingreso sin peritaje visual estructural favorable."
+            },
+            {
+                id: 2,
+                title: "TSUNAMI / MAREMOTO (BORDE COSTERO)",
+                norma: "SHOA / COTA 30 MSNM",
+                cat: "Geológico",
+                prep: "Identificación del radio de inundación SHOA y determinación precisa de la Cota 30 msnm o edificio de evacuación vertical acreditado. Señalización continua de vías de escape peatonal.",
+                dur: "Criterio de Autoevacuación Inmediata: Si el sismo impide mantenerse en pie en zona costera o suena sirena/SAE, evacuar a pie de inmediato hacia la Cota 30 sin esperar avisos posteriores.",
+                rec: "Permanecer en la Cota 30 hasta la cancelación formal y explícita de la alerta por parte del SHOA y SENAPRED. Prohibido descender a la zona costera."
+            },
+            {
+                id: 3,
+                title: "INCENDIOS ESTRUCTURALES Y AMAGOS",
+                norma: "D.S. N° 594 / LEY 20.564",
+                cat: "Incendio",
+                prep: "Dotación y mantención mensual de extintores (PQS, CO2, K) con certificación anual. Termografía semestral en tableros eléctricos. Permisos de Trabajo en Caliente obligatorios con vigía activo.",
+                dur: "Activación de alarma general. Ataque inicial por personal capacitado aplicando técnica TAPE (Tirar, Apuntar, Presionar, Emparejar). Límite: 30 segundos; si no se controla, evacuar cerrando puertas sin llave.",
+                rec: "Llamado a Bomberos (132). Entrega en la Zona de Seguridad de nómina de evacuados, planos de corte y ubicación de químicos. Prohibido reingresar sin descarte de gases por Bomberos."
+            },
+            {
+                id: 4,
+                title: "INCENDIOS DE INTERFAZ FORESTAL-URBANO",
+                norma: "CONAF / SENAPRED",
+                cat: "Incendio",
+                prep: "Mantención perimetral de franja cortafuego perenne (10-15 m) libre de maleza seca. Limpieza de canaletas y techumbres. Mantención de reserva hídrica y motobombas autónomas.",
+                dur: "Monitoreo de columnas de humo y alertas SAE. Evacuación preventiva anticipada si el frente de fuego compromete el perímetro. Corte de gas y cierre hermético de aberturas antes de salir.",
+                rec: "Inspección perimetral de focos subterráneos de brasas o árboles debilitados. Sanitización y limpieza de techos por acumulación de pavesas."
+            },
+            {
+                id: 5,
+                title: "FUGAS DE GAS COMBUSTIBLE (GLP / GN)",
+                norma: "NORMATIVA SEC",
+                cat: "Químico",
+                prep: "Instalaciones certificadas con Sello Verde SEC vigente. Cilindros en casetas ventiladas con cadenas anticaída. Sensores fijos de gas con corte electromagnético en cocinas/calderas.",
+                dur: "Alerta verbal inmediata. PROHIBICIÓN ESTRICTA: No manipular interruptores, no conectar/desconectar aparatos, no encender luces ni usar celulares en el área. Evacuar perpendicular al viento.",
+                rec: "Llamar a Bomberos (132) y a la distribuidora. Ventilación natural cruzada. Monitoreo de explosividad (< 0% LEL) antes de autorizar reingreso para mantenimiento."
+            },
+            {
+                id: 6,
+                title: "DERRAMES Y FUGAS DE SUSTANCIAS PELIGROSAS",
+                norma: "D.S. N° 43 MINSAL",
+                cat: "Químico",
+                prep: "Bodegas con pretiles de contención estancos (110% envase mayor). Hojas de Datos de Seguridad (HDS NCh2245) vigentes. Kits antiderrame operativos con absorbentes inertes y palas antichispa.",
+                dur: "Evacuar en sentido contrario al viento. Brigadistas con EPP específico (Tyvek, guantes nitrilo, filtros) confinan con cordones. PROHIBIDO lavar o verter químicos al alcantarillado.",
+                rec: "Recolección en tambores estancos rotulados. Declaración y disposición final como Residuo Peligroso (D.S. N° 148) mediante empresa autorizada (SIDREP)."
+            },
+            {
+                id: 7,
+                title: "EMERGENCIAS MÉDICAS Y PARO CARDIORRESPIRATORIO",
+                norma: "LEY N° 21.156 / DEA",
+                cat: "Antrópico",
+                prep: "Desfibrilador Externo Automático (DEA) señalizado y operativo. Botiquines dotados con material de curación sin fármacos. Brigada certificada en Soporte Vital Básico y RCP.",
+                dur: "Cadena de Supervivencia: 1) Evaluar consciencia y respiración; llamar a SAMU (131) y Mutualidad. 2) Compresiones torácicas inmediatas (100-120 cpm). 3) Conectar DEA y descargar si instruye.",
+                rec: "Traslado en ambulancia avanzada. Registro en libro de novedades y reposición inmediata de electrodos/parches del DEA e insumos clínicos."
+            },
+            {
+                id: 8,
+                title: "ASALTOS, ROBOS ARMADOS Y VIOLENCIA EXTERNA",
+                norma: "SEGURIDAD PATRIMONIAL",
+                cat: "Antrópico",
+                prep: "Control estricto de accesos y visitas. Sistema de CCTV en alta definición perimetral continuo. Pulsadores de pánico silenciosos estratégicos.",
+                dur: "PRIORIDAD ABSOLUTA A LA VIDA: CERO RESISTENCIA FÍSICA. Mantener la calma, acatar instrucciones con movimientos suaves y manos visibles. Pulsar alarma solo si es 100% encubierto.",
+                rec: "Llamar a Carabineros (133) y PDI (134). Brindar primeros auxilios a lesionados o contención en crisis. Acordonar y preservar intacto el sitio para peritajes. Derivación psicológica a Mutualidad."
+            },
+            {
+                id: 9,
+                title: "ARTEFACTOS EXPLOSIVOS O PAQUETES SOSPECHOSOS",
+                norma: "SEGURIDAD PÚBLICA / GOPE",
+                cat: "Antrópico",
+                prep: "Control e inspección de bultos anómalos (cables visibles, manchas oleosas, sobrepeso). Capacitación a recepción.",
+                dur: "PROHIBICIÓN TAJANTE: NO TOCAR, MOVER NI ABRIR. No operar radios ni teléfonos a menos de 50 metros. Evacuar de forma discreta a un radio > 100 m. Contactar al GOPE de Carabineros (133).",
+                rec: "Esperar desactivación policial. Reingreso supeditado exclusivamente a la autorización escrita y técnica del personal del GOPE."
+            },
+            {
+                id: 10,
+                title: "FUGAS DE GASES EN ESPACIOS CONFINADOS",
+                norma: "H2S, CO, ASFIXIA / RESCATE",
+                cat: "Químico",
+                prep: "Permiso de Trabajo Seguro con medición continua de gases (O2: 19.5-23.5%, H2S < 5 ppm, CO < 25 ppm, 0% LEL). Ventilación mecánica previa y uso de trípode con arnés y winche.",
+                dur: "Ante alarma: PROHIBICIÓN ESTRICTA: Ningún rescatista sin Equipo de Respiración Autónoma (ERA) debe ingresar al pozo. Extraer al operario mediante winche y llamar a Bomberos HAZMAT (132).",
+                rec: "Atención médica urgente por intoxicación/hipoxia. Evaluación y clausura del recinto hasta revalidación técnica de ventilación."
+            },
+            {
+                id: 11,
+                title: "LLUVIAS TORRENCIALES, INUNDACIONES Y ALUVIÓN",
+                norma: "SENAPRED / DMC",
+                cat: "Meteorológico",
+                prep: "Limpieza bimensual de canaletas, bajadas de agua y sumideros. Stock de sacos de arena y motobombas de achique con combustible.",
+                dur: "Colocación de barreras con sacos de arena en accesos. Desenergizar tableros en áreas inundadas. Ante aluvión inminente, ordenar evacuación vertical o hacia zonas altas.",
+                rec: "Achique mecánico de aguas residuales, desinfección sanitaria y certificación de resistencia de aislación eléctrica antes del rearme."
+            },
+            {
+                id: 12,
+                title: "TEMPORALES DE VIENTO Y VOLADURA DE TECHUMBRES",
+                norma: "DMC / TRABAJO ALTURA",
+                cat: "Meteorológico",
+                prep: "Inspección y reapriete semestral de fijaciones en planchas de zinc, letreros y portones. Poda preventiva de ramas en servidumbres de líneas eléctricas.",
+                dur: "SUSPENSIÓN INMEDIATA de faenas en altura física con vientos > 30 km/h o ráfagas. Confinar al personal al interior de edificios asegurando puertas y ventanas.",
+                rec: "Inspección de cubiertas y retiro seguro de elementos sueltos antes de autorizar el tránsito bajo aleros y marquesinas."
+            },
+            {
+                id: 13,
+                title: "TORMENTAS ELÉCTRICAS Y RAYOS",
+                norma: "DMC / PARARRAYOS",
+                cat: "Meteorológico",
+                prep: "Mallas de tierra y pararrayos certificados (< 20 Ohms). Dispositivos contra sobretensiones transitorias (DPS) en tableros generales.",
+                dur: "PARALIZACIÓN INMEDIATA de faenas en patios abiertos o techumbres. Refugio en edificios o vehículos cerrados (Jaula de Faraday). Alejarse de mallas y torres.",
+                rec: "Regla 30/30: Reanudar actividades en exteriores únicamente después de transcurridos 30 minutos desde el último trueno o relámpago percibido."
+            },
+            {
+                id: 14,
+                title: "ALTAS TEMPERATURAS Y OLAS DE CALOR",
+                norma: "D.S. N° 594 MINSAL",
+                cat: "Meteorológico",
+                prep: "Suministro permanente de agua fresca (< 15°C) garantizada. Zonas de descanso techadas con ventilación. EPP: gorro legionario y bloqueador solar FPS 50+.",
+                dur: "Pausas de hidratación obligatorias (un vaso cada 20-30 min). Rotación de cuadrillas. Ante golpe de calor: llevar a sombra, enfriar con compresas y derivar urgente al SAMU (131).",
+                rec: "Seguimiento médico de casos con fatiga térmica. Readecuación de regímenes de trabajo-descanso según alertas de la DMC/SENAPRED."
+            },
+            {
+                id: 15,
+                title: "SOCAVONES, HUNDIMIENTOS Y REMOCIONES EN MASA",
+                norma: "GEOTECNIA",
+                cat: "Geológico",
+                prep: "Inspección trimestral de taludes, muros de contención y grietas en pavimentos. Control de fugas en redes subterráneas de agua y alcantarillado.",
+                dur: "Ante crujidos o fallas de suelo: Evacuación inmediata. Delimitar perímetro de exclusión del doble de la profundidad del socavón. Corte de matrices en el cuadrante.",
+                rec: "Notificación a Dirección de Obras Municipales (DOM) y SENAPRED. Prohibido el reingreso sin informe geotécnico favorable de estabilidad."
+            },
+            {
+                id: 16,
+                title: "ERUPCIONES VOLCÁNICAS Y CAÍDA DE CENIZAS",
+                norma: "SERNAGEOMIN / SENAPRED",
+                cat: "Geológico",
+                prep: "Monitoreo de reportes OVDAS-SERNAGEOMIN. Stock permanente de respiradores para partículas (N95/P100) y antiparras selladas. Cobertores en tomas de aire.",
+                dur: "Uso obligatorio de respiradores N95 y antiparras. Sellar accesos con paños húmedos. Apagar equipos de ventilación. Evacuar por rutas oficiales si la autoridad lo indica.",
+                rec: "Limpieza de techumbres EXCLUSIVAMENTE EN SECO para evitar sobrepeso y colapso (prohibido usar agua). Reemplazo de filtros en maquinarias."
+            },
+            {
+                id: 17,
+                title: "CORTE NO PROGRAMADO DE ENERGÍA ELÉCTRICA",
+                norma: "CONTINUIDAD OPERATIVA",
+                cat: "Antrópico",
+                prep: "Inspección mensual de luces de emergencia autónomas LED (mín. 90 min según D.S. 594). Mantenimiento y prueba con carga del grupo electrógeno y UPS.",
+                dur: "Encendido automático de luces de escape. Bloqueo de maquinaria rotatoria para prevenir arranques intempestivos al volver la red. Uso de linternas portátiles LED.",
+                rec: "Control de combustible del generador. Al retornar el suministro, esperar mínimo 5 minutos de estabilización de voltaje antes de reenergizar maquinaria pesada."
+            },
+            {
+                id: 18,
+                title: "CORTE PROLONGADO DE AGUA POTABLE",
+                norma: "D.S. N° 594 / ART. 184 BIS",
+                cat: "Antrópico",
+                prep: "Estanques de reserva para autonomía mínima de 24-48 hrs garantizando al menos 30 litros diarios por trabajador. Sanitización semestral de estanques.",
+                dur: "Conexión de bombas de respaldo. Racionamiento: agua reservada exclusivamente para baños y consumo. Coordinación urgente de camiones aljibe certificados.",
+                rec: "Criterio Legal de Suspensión: Si se agota el agua para baños y consumo, el empleador debe SUSPENDER LA JORNADA (Art. 184 bis / D.S. 594) y evacuar sin merma salarial."
+            }
+        ];
+
+        // VARIABLES DE ESTADO Y AUDIO
+        let audioCtx = null;
+        let sirenOsc = null;
+        let sirenGain = null;
+        let sirenInterval = null;
+        let whistleOsc = null;
+        let whistleGain = null;
+        let isStrobeOn = false;
+        let currentGps = null;
+        let currentGpsAt = null;
+        let currentStatus = null;
+        let actionCooldownUntil = 0;
+        const ACTION_COOLDOWN_MS = 4000;
+        const AUDIO_FADE_SECONDS = 0.03;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPoes(poesData);
+            loadCentroData();
+            initGeolocation();
+            restoreLocalStatus();
+            updatePhoneWarning();
+            initKitCheckboxes();
+            applyHashSection();
+            window.addEventListener('hashchange', applyHashSection);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('message-preview-modal');
+                    if (!modal.classList.contains('hidden')) {
+                        document.getElementById('message-preview-cancel').click();
+                    }
+                }
+            });
+        });
+
+        // RENDER DE TARJETAS POE
+        function renderPoes(list) {
+            const grid = document.getElementById('poeGrid');
+            grid.innerHTML = '';
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="col-span-2 text-center py-12 text-slate-500 text-xs bg-slate-950 rounded-2xl border border-slate-800"><i class="fa-solid fa-folder-open text-3xl mb-2"></i><p>No se encontraron planes que coincidan con la búsqueda.</p></div>';
+                return;
+            }
+            list.forEach(poe => {
+                const card = document.createElement('div');
+                card.className = "poe-card-print bg-slate-950 rounded-2xl border border-slate-800 shadow-xl overflow-hidden flex flex-col justify-between text-white";
+                card.innerHTML = `
+                    <div>
+                        <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-6 h-6 rounded-lg bg-chileBlue text-yellow-300 font-extrabold text-xs flex items-center justify-center">${poe.id}</span>
+                                <h3 class="font-bold text-xs leading-tight tracking-wide text-slate-100">${poe.title}</h3>
+                            </div>
+                            <span class="text-[9px] uppercase font-bold text-blue-300 bg-blue-950 px-2 py-0.5 rounded border border-blue-800/50">${poe.cat}</span>
+                        </div>
+                        <div class="p-4 space-y-3 text-xs">
+                            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-800/80">
+                                Marco / Norma: <span class="text-blue-400 font-bold">${poe.norma}</span>
+                            </div>
+                            <div>
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-950 text-blue-300 border border-blue-800/60 uppercase inline-block mb-1">PREVENCIÓN (AIDEP)</span>
+                                <p class="text-slate-300 leading-relaxed">${poe.prep}</p>
+                            </div>
+                            <div>
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-red-950 text-red-300 border border-red-800/60 uppercase inline-block mb-1">DURANTE (ACCEDER)</span>
+                                <p class="text-slate-300 leading-relaxed">${poe.dur}</p>
+                            </div>
+                            <div>
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-950 text-emerald-300 border border-emerald-800/60 uppercase inline-block mb-1">DESPUÉS (RECUPERACIÓN)</span>
+                                <p class="text-slate-300 leading-relaxed">${poe.rec}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterPoes() {
+            const q = document.getElementById('poeSearch').value.toLowerCase();
+            const filtered = poesData.filter(p => 
+                p.title.toLowerCase().includes(q) || 
+                p.norma.toLowerCase().includes(q) || 
+                p.prep.toLowerCase().includes(q) || 
+                p.dur.toLowerCase().includes(q) || 
+                p.rec.toLowerCase().includes(q)
+            );
+            renderPoes(filtered);
+        }
+
+        function filterCategory(cat, evt) {
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.classList.remove('bg-chileBlue', 'text-white');
+                b.classList.add('bg-slate-900', 'text-slate-300');
+            });
+            const target = evt ? evt.target : null;
+            if (target) {
+                target.classList.remove('bg-slate-900', 'text-slate-300');
+                target.classList.add('bg-chileBlue', 'text-white');
+            }
+
+            if (cat === 'todos') {
+                renderPoes(poesData);
+            } else {
+                const filtered = poesData.filter(p => p.cat.toLowerCase().includes(cat.toLowerCase()));
+                renderPoes(filtered);
+            }
+        }
+
+        const MAIN_SECTIONS = ['poe', 'sos', 'directorio', 'grave', 'centro', 'drill'];
+
+        function switchMainSection(target) {
+            MAIN_SECTIONS.forEach(s => {
+                const secEl = document.getElementById(`section-${s}`);
+                const navEl = document.getElementById(`nav-${s}`);
+                if (s === target) {
+                    secEl.classList.remove('hidden');
+                    if (navEl) navEl.className = 'px-3 py-1.5 rounded-lg bg-chileBlue text-white transition flex items-center gap-1.5 shrink-0';
+                } else {
+                    secEl.classList.add('hidden');
+                    if (navEl) navEl.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0';
+                }
+            });
+            if (target && window.location.hash !== `#${target}`) {
+                history.replaceState(null, '', `#${target}`);
+            }
+        }
+
+        // Permite abrir la app directo en una sección vía accesos directos del
+        // manifest (ej. clic derecho en el ícono instalado -> "Panel SOS") o
+        // un enlace tipo index.html#sos.
+        function applyHashSection() {
+            const hash = (window.location.hash || '').replace('#', '');
+            if (MAIN_SECTIONS.includes(hash)) {
+                switchMainSection(hash);
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = msg;
+            if (type === 'error') {
+                toastIcon.className = 'fa-solid fa-triangle-exclamation text-red-400 text-base';
+            } else if (type === 'success') {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
+            } else {
+                toastIcon.className = 'fa-solid fa-circle-info text-blue-400 text-base';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function announceToScreenReader(msg) {
+            const region = document.getElementById('sr-live-region');
+            region.textContent = '';
+            setTimeout(() => { region.textContent = msg; }, 50);
+        }
+
+        // SIRENA SOS
+        function toggleSiren() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (sirenOsc) {
+                stopSiren();
+                showToast("Sirena detenida");
+            } else {
+                if (whistleOsc) toggleWhistle();
+                sirenOsc = audioCtx.createOscillator();
+                sirenGain = audioCtx.createGain();
+                sirenOsc.type = 'sawtooth';
+
+                const now = audioCtx.currentTime;
+                sirenOsc.frequency.setValueAtTime(600, now);
+                sirenOsc.frequency.linearRampToValueAtTime(1200, now + 0.5);
+
+                sirenGain.gain.setValueAtTime(0, now);
+                sirenGain.gain.linearRampToValueAtTime(1, now + AUDIO_FADE_SECONDS);
+
+                sirenOsc.connect(sirenGain);
+                sirenGain.connect(audioCtx.destination);
+                sirenOsc.start();
+
+                sirenInterval = setInterval(() => {
+                    if (sirenOsc && audioCtx) {
+                        const t = audioCtx.currentTime;
+                        sirenOsc.frequency.setValueAtTime(600, t);
+                        sirenOsc.frequency.linearRampToValueAtTime(1200, t + 0.5);
+                    }
+                }, 1000);
+
+                document.getElementById('lbl-siren').textContent = 'Detener Sirena';
+                document.getElementById('btn-siren').classList.add('animate-pulse');
+                showToast("Sirena SOS activada a alto volumen", "error");
+            }
+        }
+
+        function stopSiren() {
+            if (sirenOsc && sirenGain && audioCtx) {
+                const t = audioCtx.currentTime;
+                sirenGain.gain.cancelScheduledValues(t);
+                sirenGain.gain.setValueAtTime(sirenGain.gain.value, t);
+                sirenGain.gain.linearRampToValueAtTime(0, t + AUDIO_FADE_SECONDS);
+                const oscToStop = sirenOsc;
+                const gainToStop = sirenGain;
+                setTimeout(() => {
+                    try { oscToStop.stop(); } catch (e) {}
+                    oscToStop.disconnect();
+                    gainToStop.disconnect();
+                }, AUDIO_FADE_SECONDS * 1000 + 10);
+            }
+            sirenOsc = null;
+            sirenGain = null;
+            if (sirenInterval) {
+                clearInterval(sirenInterval);
+                sirenInterval = null;
+            }
+            document.getElementById('lbl-siren').textContent = 'Activar Sirena';
+            document.getElementById('btn-siren').classList.remove('animate-pulse');
+        }
+
+        // SILBATO
+        function toggleWhistle() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (whistleOsc) {
+                const t = audioCtx.currentTime;
+                const oscToStop = whistleOsc;
+                const gainToStop = whistleGain;
+                if (gainToStop) {
+                    gainToStop.gain.cancelScheduledValues(t);
+                    gainToStop.gain.setValueAtTime(gainToStop.gain.value, t);
+                    gainToStop.gain.linearRampToValueAtTime(0, t + AUDIO_FADE_SECONDS);
+                }
+                setTimeout(() => {
+                    try { oscToStop.stop(); } catch (e) {}
+                    oscToStop.disconnect();
+                    if (gainToStop) gainToStop.disconnect();
+                }, AUDIO_FADE_SECONDS * 1000 + 10);
+                whistleOsc = null;
+                whistleGain = null;
+                document.getElementById('lbl-whistle').textContent = 'Silbato SOS';
+                document.getElementById('btn-whistle').classList.remove('animate-pulse');
+            } else {
+                if (sirenOsc) stopSiren();
+                whistleOsc = audioCtx.createOscillator();
+                whistleGain = audioCtx.createGain();
+                whistleOsc.type = 'sine';
+                whistleOsc.frequency.setValueAtTime(2800, audioCtx.currentTime);
+
+                const now = audioCtx.currentTime;
+                whistleGain.gain.setValueAtTime(0, now);
+                whistleGain.gain.linearRampToValueAtTime(1, now + AUDIO_FADE_SECONDS);
+
+                whistleOsc.connect(whistleGain);
+                whistleGain.connect(audioCtx.destination);
+                whistleOsc.start();
+
+                document.getElementById('lbl-whistle').textContent = 'Detener Silbato';
+                document.getElementById('btn-whistle').classList.add('animate-pulse');
+                showToast("Silbato SOS activado (2800 Hz)");
+            }
+        }
+
+        // ESTROBO
+        function toggleStrobe() {
+            const container = document.getElementById('strobe-container');
+            const btn = document.getElementById('btn-strobe');
+            if (!isStrobeOn) {
+                const confirmed = window.confirm("Esta luz parpadea en rojo y blanco.\nPuede afectar a personas fotosensibles o con epilepsia.\n¿Confirmas activarla?");
+                if (!confirmed) return;
+            }
+            isStrobeOn = !isStrobeOn;
+            if (isStrobeOn) {
+                container.classList.add('strobe-active');
+                btn.textContent = 'Detener';
+                showToast("Estrobo visual activado", "error");
+            } else {
+                container.classList.remove('strobe-active');
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>Estrobo SOS</span>';
+            }
+        }
+
+        // GPS
+        function initGeolocation() {
+            if ("geolocation" in navigator) {
+                document.getElementById('gps-display').textContent = 'GPS: Localizando...';
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        currentGps = { lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5) };
+                        currentGpsAt = new Date();
+                        document.getElementById('gps-display').textContent = `GPS: ${currentGps.lat}, ${currentGps.lng}`;
+                    },
+                    (err) => {
+                        document.getElementById('gps-display').textContent = 'GPS: Sin señal / denegado';
+                    }
+                );
+            } else {
+                document.getElementById('gps-display').textContent = 'GPS: No disponible';
+            }
+        }
+
+        function buildSmsHref(phone, body) {
+            // iOS usa "&body=" y Android usa "?body=" para prellenar el SMS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const separator = isIOS ? '&' : '?';
+            return `sms:${encodeURIComponent(phone)}${separator}body=${encodeURIComponent(body)}`;
+        }
+
+        function isPlausiblePhone(value) {
+            const digits = (value || '').replace(/[^0-9]/g, '');
+            return digits.length >= 8 && /^[0-9+()\-\s]+$/.test(value || '');
+        }
+
+        function updatePhoneWarning() {
+            const phone = (document.getElementById('app-input-phone').value || '').trim();
+            const warning = document.getElementById('phone-warning');
+            if (!phone || !isPlausiblePhone(phone)) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
+
+        function isOnCooldown() {
+            if (Date.now() < actionCooldownUntil) {
+                showToast("Espera unos segundos antes de reenviar", "info");
+                return true;
+            }
+            return false;
+        }
+        function startCooldown() {
+            actionCooldownUntil = Date.now() + ACTION_COOLDOWN_MS;
+        }
+
+        function buildStatusMessage(statusText) {
+            const address = document.getElementById('app-input-address').value || 'nuestro centro de trabajo';
+            const coordsStr = currentGps ? `https://maps.google.com/?q=${currentGps.lat},${currentGps.lng}` : '';
+            return `[ALERTA EMERGENCIA PRRD] ${statusText}. Ubicación: ${address}. ${coordsStr}`.trim();
+        }
+
+        let messagePreviewLastFocused = null;
+        function showMessagePreview({ recipient, text, locationNote }) {
+            const modal = document.getElementById('message-preview-modal');
+            const recipientEl = document.getElementById('message-preview-recipient');
+            const textEl = document.getElementById('message-preview-text');
+            const noteEl = document.getElementById('message-preview-location-note');
+            const btnConfirm = document.getElementById('message-preview-confirm');
+            const btnCancel = document.getElementById('message-preview-cancel');
+
+            recipientEl.textContent = `Destinatario: ${recipient}`;
+            textEl.textContent = text;
+            noteEl.textContent = '';
+            const icon = document.createElement('i');
+            icon.className = 'fa-solid fa-location-dot mt-0.5';
+            const span = document.createElement('span');
+            span.textContent = locationNote;
+            noteEl.appendChild(icon);
+            noteEl.appendChild(span);
+
+            messagePreviewLastFocused = document.activeElement;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            btnCancel.focus();
+
+            return new Promise((resolve) => {
+                function cleanup(result) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    btnConfirm.removeEventListener('click', onConfirm);
+                    btnCancel.removeEventListener('click', onCancel);
+                    if (messagePreviewLastFocused && typeof messagePreviewLastFocused.focus === 'function') {
+                        messagePreviewLastFocused.focus();
+                    }
+                    resolve(result);
+                }
+                function onConfirm() { cleanup(true); }
+                function onCancel() { cleanup(false); }
+                btnConfirm.addEventListener('click', onConfirm);
+                btnCancel.addEventListener('click', onCancel);
+            });
+        }
+
+        async function confirmStatusMessage(phone, statusText) {
+            const msg = buildStatusMessage(statusText);
+            const locationNote = currentGps
+                ? `Se incluirá ubicación GPS exacta (${currentGpsAt ? currentGpsAt.toLocaleTimeString('es-CL') : 'reciente'}).`
+                : 'No se obtuvo GPS; se enviará solo la dirección configurada.';
+            const confirmed = await showMessagePreview({ recipient: phone, text: msg, locationNote });
+            return confirmed ? msg : null;
+        }
+
+        async function sendEmergencySMS() {
+            if (isOnCooldown()) return;
+            const phone = (document.getElementById('app-input-phone').value || '').trim();
+            if (!phone || !isPlausiblePhone(phone)) {
+                showToast("Ingresa un teléfono válido en la Ficha CGRD", "error");
+                return;
+            }
+            const msg = await confirmStatusMessage(phone, 'Estoy a salvo en la Zona de Seguridad');
+            if (!msg) { showToast("Envío cancelado"); return; }
+            startCooldown();
+            window.location.href = buildSmsHref(phone, msg);
+        }
+
+        async function shareStatus(channel) {
+            if (isOnCooldown()) return;
+            if (!currentStatus) {
+                showToast("Selecciona primero tu estado arriba", "error");
+                return;
+            }
+            const phone = (document.getElementById('app-input-phone').value || '').trim();
+            if (!phone || !isPlausiblePhone(phone)) {
+                showToast("Ingresa un teléfono válido en la Ficha CGRD", "error");
+                return;
+            }
+            const statusText = currentStatus === 'safe' ? 'Estoy a salvo' : '¡NECESITO AYUDA EN EL ÁREA!';
+            const msg = await confirmStatusMessage(phone, statusText);
+            if (!msg) { showToast("Envío cancelado"); return; }
+            startCooldown();
+            if (channel === 'whatsapp') {
+                const waPhone = phone.replace(/[^0-9]/g, '');
+                window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+            } else {
+                window.location.href = buildSmsHref(phone, msg);
+            }
+        }
+
+        async function callEmergencyContact() {
+            if (isOnCooldown()) return;
+            const phone = (document.getElementById('app-input-phone').value || '').trim();
+            if (!phone || !isPlausiblePhone(phone)) {
+                showToast("Ingresa un teléfono válido en la Ficha CGRD", "error");
+                return;
+            }
+            const confirmed = await showMessagePreview({
+                recipient: phone,
+                text: `Se iniciará llamada directa a ${phone}.`,
+                locationNote: 'Las llamadas de voz convencionales no transmiten GPS digital.'
+            });
+            if (!confirmed) { showToast("Llamada cancelada"); return; }
+            startCooldown();
+            window.location.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+        }
+
+        // TEXT TO SPEECH
+        function speakEmergencySteps() {
+            if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                    document.getElementById('lbl-tts').textContent = 'Guía Audible';
+                    return;
+                }
+                const speechText = "Instrucciones de emergencia. Uno: Mantén la calma. Dos: Agáchate, cúbrete y protégete. Tres: Aléjate de ventanales y maquinarias. Cuatro: Sigue las instrucciones de los monitores de evacuación y brigadistas.";
+                const utterance = new SpeechSynthesisUtterance(speechText);
+                utterance.lang = 'es-CL';
+                utterance.rate = 0.95;
+                utterance.onstart = () => { document.getElementById('lbl-tts').textContent = 'Detener Voz'; };
+                utterance.onend = () => { document.getElementById('lbl-tts').textContent = 'Guía Audible'; };
+                window.speechSynthesis.speak(utterance);
+                showToast("Reproduciendo guía audible");
+            } else {
+                showToast("Navegador sin síntesis de voz", "error");
+            }
+        }
+
+        // SIMULACRO
+        let drillTimer = null;
+        let drillSeconds = 60;
+        function startDrill() {
+            if (drillTimer) return;
+            drillSeconds = 60;
+            const timerEl = document.getElementById('drill-timer');
+            const instEl = document.getElementById('drill-instruction');
+            const btn = document.getElementById('btn-start-drill');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            if ('speechSynthesis' in window) {
+                const startSpeech = new SpeechSynthesisUtterance("Inicio de simulacro de emergencia. Atención a brigadistas y monitores.");
+                startSpeech.lang = 'es-CL';
+                window.speechSynthesis.speak(startSpeech);
+            }
+
+            drillTimer = setInterval(() => {
+                drillSeconds--;
+                const secs = drillSeconds < 10 ? `0${drillSeconds}` : drillSeconds;
+                timerEl.textContent = `00:${secs}`;
+
+                if (drillSeconds === 45) {
+                    instEl.textContent = "¡FASE DE IMPACTO! Mantén posición de autoprotección y corta suministros.";
+                } else if (drillSeconds === 30) {
+                    instEl.textContent = "Inicia evacuación ordenada hacia la Zona de Seguridad por vías señalizadas.";
+                } else if (drillSeconds === 15) {
+                    instEl.textContent = "Monitores ejecutan barrido de recintos y censo nominal en el punto exterior.";
+                } else if (drillSeconds <= 0) {
+                    clearInterval(drillTimer);
+                    drillTimer = null;
+                    timerEl.textContent = "00:00";
+                    instEl.textContent = "¡Simulacro completado! Registre tiempos y novedades.";
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+
+                    if ('speechSynthesis' in window) {
+                        const endSpeech = new SpeechSynthesisUtterance("Simulacro concluido. Procedan con el conteo nominal.");
+                        endSpeech.lang = 'es-CL';
+                        window.speechSynthesis.speak(endSpeech);
+                    }
+                }
+            }, 1000);
+        }
+
+        function resetDrill() {
+            if (drillTimer) {
+                clearInterval(drillTimer);
+                drillTimer = null;
+            }
+            document.getElementById('drill-timer').textContent = "00:60";
+            document.getElementById('drill-instruction').textContent = 'Presiona "Iniciar Simulacro" para comenzar';
+            const btn = document.getElementById('btn-start-drill');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+        }
+
+        // GUARDADO FICHA CGRD
+        function saveCentroData() {
+            const fields = ['address', 'commune', 'meeting', 'safezone', 'contact', 'phone'];
+            const data = {};
+            fields.forEach(f => {
+                const el = document.getElementById(`app-input-${f}`);
+                if (el) data[f] = el.value;
+            });
+            try {
+                localStorage.setItem('prrd_centro_data', JSON.stringify(data));
+            } catch (e) {}
+            updatePhoneWarning();
+        }
+
+        function loadCentroData() {
+            const saved = localStorage.getItem('prrd_centro_data');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    Object.keys(data).forEach(key => {
+                        const el = document.getElementById(`app-input-${key}`);
+                        if (el) el.value = data[key];
+                    });
+                } catch (e) {}
+            }
+        }
+
+        function clearLocalData() {
+            if (!window.confirm('¿Borrar todos los datos de faena y checklist guardados en este navegador?')) return;
+            localStorage.removeItem('prrd_centro_data');
+            localStorage.removeItem('prrd_kit_checklist');
+            sessionStorage.removeItem('prrd_last_status');
+
+            const fields = ['address', 'commune', 'meeting', 'safezone', 'contact', 'phone'];
+            fields.forEach(f => {
+                const el = document.getElementById(`app-input-${f}`);
+                if (el) el.value = '';
+            });
+            document.querySelectorAll('.app-kit-cb').forEach(cb => { cb.checked = false; });
+            syncKitCheckboxes();
+            currentStatus = null;
+            applyStatusUI(null);
+            updatePhoneWarning();
+            showToast('Datos locales eliminados');
+        }
+
+        // CHECKBOXES KIT 72H
+        function syncKitCheckboxes() {
+            const cbs = document.querySelectorAll('.app-kit-cb');
+            let checked = 0;
+            const state = {};
+            cbs.forEach(cb => {
+                if (cb.checked) checked++;
+                state[cb.dataset.kitItem] = cb.checked;
+            });
+            const total = cbs.length;
+            const pct = Math.round((checked / total) * 100);
+            document.getElementById('app-kit-counter').textContent = `${checked} / ${total} Listos`;
+            document.getElementById('app-kit-bar').style.width = `${pct}%`;
+            try {
+                localStorage.setItem('prrd_kit_checklist', JSON.stringify(state));
+            } catch (e) {}
+        }
+
+        function initKitCheckboxes() {
+            const saved = localStorage.getItem('prrd_kit_checklist');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    document.querySelectorAll('.app-kit-cb').forEach(cb => {
+                        if (state[cb.dataset.kitItem] !== undefined) {
+                            cb.checked = state[cb.dataset.kitItem];
+                        }
+                    });
+                } catch (e) {}
+            }
+            syncKitCheckboxes();
+        }
+
+        // ESTADO PERSONAL
+        function restoreLocalStatus() {
+            const status = sessionStorage.getItem('prrd_last_status');
+            if (status === 'safe' || status === 'help') {
+                applyStatusUI(status, { silent: true });
+            }
+        }
+
+        function applyStatusUI(status, opts = {}) {
+            const btnSafe = document.getElementById('btn-status-safe');
+            const btnHelp = document.getElementById('btn-status-help');
+            const btnShareSms = document.getElementById('btn-share-sms');
+            const btnShareWa = document.getElementById('btn-share-whatsapp');
+            const btnCall = document.getElementById('btn-call-contact');
+            const shareHint = document.getElementById('status-share-hint');
+            const globalBanner = document.getElementById('global-status-banner');
+            const globalIcon = document.getElementById('global-status-icon');
+            const globalText = document.getElementById('global-status-text');
+
+            currentStatus = status;
+
+            if (status === 'safe') {
+                btnSafe.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-600 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow';
+                btnHelp.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-slate-800 text-slate-400 font-bold text-xs transition flex items-center justify-center gap-2';
+                if (!opts.silent) {
+                    showToast("Estado actualizado: A SALVO", "success");
+                    announceToScreenReader("Tu estado se actualizó a: estoy a salvo.");
+                }
+                btnCall.classList.add('hidden');
+                btnCall.classList.remove('flex');
+                globalBanner.className = 'no-print flex border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold bg-emerald-950/60 text-emerald-300';
+                globalIcon.className = 'fa-solid fa-shield-heart';
+                globalText.textContent = 'Estado Operativo: Estoy a Salvo';
+            } else if (status === 'help') {
+                btnHelp.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-red-600 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow';
+                btnSafe.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-slate-800 text-slate-400 font-bold text-xs transition flex items-center justify-center gap-2';
+                if (!opts.silent) {
+                    showToast("Estado actualizado: NECESITO AYUDA", "error");
+                    announceToScreenReader("Tu estado se actualizó a: necesito ayuda.");
+                }
+                btnCall.classList.remove('hidden');
+                btnCall.classList.add('flex');
+                globalBanner.className = 'no-print flex border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold bg-red-950/70 text-red-300 animate-pulse';
+                globalIcon.className = 'fa-solid fa-hand-holding-medical';
+                globalText.textContent = 'Estado Operativo: NECESITO AYUDA';
+            } else {
+                btnSafe.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow';
+                btnHelp.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-bold text-xs transition flex items-center justify-center gap-2';
+                btnCall.classList.add('hidden');
+                globalBanner.classList.add('hidden');
+            }
+
+            if (status) {
+                [btnShareSms, btnShareWa].forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
+                });
+                btnShareSms.classList.add('bg-chileBlue', 'hover:bg-blue-600', 'text-white');
+                btnShareWa.classList.add('bg-emerald-600', 'hover:bg-emerald-500', 'text-white');
+                shareHint.textContent = 'Listo para notificar a tu contacto registrado.';
+            } else {
+                [btnShareSms, btnShareWa].forEach(btn => {
+                    btn.disabled = true;
+                    btn.className = 'px-3 py-2 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed';
+                });
+                shareHint.textContent = 'Selecciona un estado arriba para poder avisarle a tu contacto.';
+            }
+        }
+
+        window.setUserStatus = function(status) {
+            applyStatusUI(status);
+            sessionStorage.setItem('prrd_last_status', status);
+        };
+    </script>
+
+    <!-- SERVICE WORKER PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => console.log('Service Worker registrado:', reg.scope))
+                    .catch((err) => console.error('Error Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+</html>

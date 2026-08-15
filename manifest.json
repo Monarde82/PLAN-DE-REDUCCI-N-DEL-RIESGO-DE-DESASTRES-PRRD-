@@ -1,4 +1,5 @@
 {
+  "id": "./index.html",
   "name": "PRRD & POE App Chile - Gestión del Riesgo y Emergencias",
   "short_name": "PRRD & POE",
   "description": "Procedimientos Operativos Estandarizados, directorio de emergencia 24/7 y herramientas SOS para centros de trabajo en Chile. Funciona sin conexión.",
@@ -13,25 +14,18 @@
   "dir": "ltr",
   "categories": ["productivity", "utilities", "business"],
   "prefer_related_applications": false,
+  "related_applications": [],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
   "icons": [
-    {
-      "src": "./icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
     {
@@ -39,21 +33,40 @@
       "short_name": "SOS",
       "description": "Avisar si estás a salvo o necesitas ayuda",
       "url": "./index.html#sos",
-      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "./icons/icon-192.png", "sizes": "192x192" },
+        { "src": "./icon-192.png", "sizes": "192x192" }
+      ]
     },
     {
       "name": "Directorio de emergencia 24/7",
       "short_name": "Directorio",
       "description": "Bomberos, SAMU, Carabineros y mutualidades",
       "url": "./index.html#directorio",
-      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "./icons/icon-192.png", "sizes": "192x192" },
+        { "src": "./icon-192.png", "sizes": "192x192" }
+      ]
     },
     {
       "name": "Accidente grave o fatal",
       "short_name": "Accidente grave",
       "description": "Protocolo Circular N° 3333 y notificación obligatoria",
       "url": "./index.html#grave",
-      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "./icons/icon-192.png", "sizes": "192x192" },
+        { "src": "./icon-192.png", "sizes": "192x192" }
+      ]
+    },
+    {
+      "name": "Simulacro cronometrado",
+      "short_name": "Simulacro",
+      "description": "Ensayo de 60 segundos con instrucciones por voz",
+      "url": "./index.html#drill",
+      "icons": [
+        { "src": "./icons/icon-192.png", "sizes": "192x192" },
+        { "src": "./icon-192.png", "sizes": "192x192" }
+      ]
     }
   ]
 }

@@ -2,15 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self';">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none';">
     <title>PRRD & POE App - Gestión del Riesgo y Emergencias</title>
+    <meta name="description" content="Aplicación instalable de Plan de Reducción del Riesgo de Desastres y Procedimientos Operativos Estandarizados para centros de trabajo en Chile.">
 
     <!-- PWA & Metadatos Multiplataforma (PC & Móvil) -->
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon-192.png">
     <meta name="theme-color" content="#002b7f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,8 +21,6 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -45,7 +44,7 @@
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; font-size: 9pt !important; padding: 0 !important; margin: 0 !important; color: black !important; }
-            #section-poe, #section-directorio, #section-grave, #section-centro, #section-amenazas, #section-simulacros {
+            #section-poe, #section-sos, #section-directorio, #section-grave, #section-centro, #section-drill {
                 display: block !important;
                 page-break-inside: auto;
             }
@@ -71,6 +70,9 @@
                 animation: none;
                 background-color: #d52b1e;
             }
+            .animate-bounce, .animate-pulse, .animate-ping {
+                animation: none !important;
+            }
         }
         ::-webkit-scrollbar {
             width: 6px;
@@ -85,9 +87,79 @@
             outline-offset: 2px;
             border-radius: 4px;
         }
+        /* Íconos SVG propios: heredan el color y el tamaño del texto */
+        .ic {
+            width: 1.05em;
+            height: 1.05em;
+            display: inline-block;
+            vertical-align: -0.15em;
+            flex-shrink: 0;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .ic-lg { width: 1.4em; height: 1.4em; }
+
+        /* Respaldo mínimo si el CDN de Tailwind no alcanza a cargar (modo sin conexión el primer arranque) */
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans min-h-screen antialiased pb-16 selection:bg-red-500 selection:text-white">
+
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-shield-halved" viewBox="0 0 24 24"><path d="M12 2.5 4.5 5.6V11c0 4.8 3.2 8.2 7.5 10 4.3-1.8 7.5-5.2 7.5-10V5.6L12 2.5Z"/><path d="M12 2.5v18"/></symbol>
+    <symbol id="i-shield-heart" viewBox="0 0 24 24"><path d="M12 2.5 4.5 5.6V11c0 4.8 3.2 8.2 7.5 10 4.3-1.8 7.5-5.2 7.5-10V5.6L12 2.5Z"/><path d="M12 16s-3.2-2-3.2-4.2A1.8 1.8 0 0 1 12 10.7a1.8 1.8 0 0 1 3.2 1.1C15.2 14 12 16 12 16Z"/></symbol>
+    <symbol id="i-bolt-lightning" viewBox="0 0 24 24"><path d="M13.2 2 4.5 13.8h6.2L9.9 22l8.9-11.9h-6.2L13.2 2Z"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.2 2 4.5 13.8h6.2L9.9 22l8.9-11.9h-6.2L13.2 2Z"/></symbol>
+    <symbol id="i-triangle-exclamation" viewBox="0 0 24 24"><path d="M10.3 3.9 2.5 17.4A1.9 1.9 0 0 0 4.2 20.3h15.6a1.9 1.9 0 0 0 1.7-2.9L13.7 3.9a1.9 1.9 0 0 0-3.4 0Z"/><path d="M12 9.2v4"/><path d="M12 16.8h.01"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M21.5 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 1.6 4.2 2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L7.6 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></symbol>
+    <symbol id="i-phone-volume" viewBox="0 0 24 24"><path d="M14.5 17.6v2.3a1.8 1.8 0 0 1-2 1.8 16.6 16.6 0 0 1-7.2-2.6 16.4 16.4 0 0 1-5-5A16.6 16.6 0 0 1 1.7 6.8a1.8 1.8 0 0 1 1.8-2h2.3a1.8 1.8 0 0 1 1.8 1.5c.1.8.3 1.5.6 2.2a1.8 1.8 0 0 1-.4 1.9l-1 1a13.4 13.4 0 0 0 5 5l1-1a1.8 1.8 0 0 1 1.9-.4c.7.3 1.4.5 2.2.6a1.8 1.8 0 0 1 1.6 1.9Z"/><path d="M16.5 2.5a7.5 7.5 0 0 1 5.4 5.4"/><path d="M16 6.5a3.5 3.5 0 0 1 2.2 2.2"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.6"/><path d="M9.5 21v-4.5h5V21"/><path d="M8 7.5h1.5M14.5 7.5H16M8 11.5h1.5M14.5 11.5H16"/></symbol>
+    <symbol id="i-building-circle-check" viewBox="0 0 24 24"><path d="M16.5 21H4.5V3.5h12v7"/><path d="M8 7.5h1.5M12.5 7.5H14M8 11.5h1.5M12.5 11.5H14"/><circle cx="17.5" cy="17.5" r="4.2"/><path d="M15.7 17.6 17 18.9l2.3-2.5"/></symbol>
+    <symbol id="i-person-falling-burst" viewBox="0 0 24 24"><circle cx="8.5" cy="4.6" r="2.1"/><path d="M4 20.5 7 15l3.8-1.8 2.7 2.8"/><path d="M10.8 13.2 14.5 12"/><path d="M18.5 3.5 20 5M21.5 8.5h-2.2M20.2 12.5 18.7 11"/></symbol>
+    <symbol id="i-stopwatch" viewBox="0 0 24 24"><circle cx="12" cy="13.8" r="7.6"/><path d="M12 13.8V9.8"/><path d="M9.4 2.2h5.2"/><path d="M12 2.2v3.9"/><path d="M18.6 7.2 20.3 5.5"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.4 8.6a15 15 0 0 1 19.2 0"/><path d="M5.6 12.2a11 11 0 0 1 12.8 0"/><path d="M8.7 15.7a6.4 6.4 0 0 1 6.6 0"/><path d="M12 19.4h.01"/></symbol>
+    <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M2.5 2.5 21.5 21.5"/><path d="M8.7 15.7a6.4 6.4 0 0 1 6.6 0"/><path d="M5.6 12.2a11 11 0 0 1 3.4-2.1"/><path d="M2.4 8.6a15 15 0 0 1 4.6-2.9"/><path d="M13.5 5.4a15 15 0 0 1 8.1 3.2"/><path d="M12 19.4h.01"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12.5"/><path d="M7.2 10.8 12 15.6l4.8-4.8"/><path d="M4 20h16"/></symbol>
+    <symbol id="i-file-pdf" viewBox="0 0 24 24"><path d="M14 2.6H7.2A1.7 1.7 0 0 0 5.5 4.3v15.4a1.7 1.7 0 0 0 1.7 1.7h9.6a1.7 1.7 0 0 0 1.7-1.7V7.1L14 2.6Z"/><path d="M13.8 2.6v4.6h4.7"/><path d="M9 13h6M9 16.5h4"/></symbol>
+    <symbol id="i-hand-holding-medical" viewBox="0 0 24 24"><rect x="7.5" y="2.5" width="9" height="7.5" rx="1.4"/><path d="M12 4.5v3.5M10.2 6.2h3.6"/><path d="M3 14v7"/><path d="M6.5 15.2h4l2.6 1.6h3.6a1.7 1.7 0 0 1 0 3.4h-6.4"/></symbol>
+    <symbol id="i-share-nodes" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.7 15.7 6.4"/><path d="M8.3 13.3l7.4 4.3"/></symbol>
+    <symbol id="i-location-dot" viewBox="0 0 24 24"><path d="M12 21.3s7-5.9 7-11.3a7 7 0 1 0-14 0c0 5.4 7 11.3 7 11.3Z"/><circle cx="12" cy="9.8" r="2.6"/></symbol>
+    <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20.4 12a8.4 8.4 0 1 1-2.7-6.2"/><path d="M20.6 3.6v5h-5"/></symbol>
+    <symbol id="i-paper-plane" viewBox="0 0 24 24"><path d="M21.6 2.4 2.4 10.6l7.6 3 3 7.6 8.6-18.8Z"/><path d="M10 13.6 21.6 2.4"/></symbol>
+    <symbol id="i-comment-sms" viewBox="0 0 24 24"><path d="M21 12.2a7.6 7.6 0 0 1-7.6 7.6H8.2L4 22.5v-4.3A7.6 7.6 0 0 1 3 12.2 7.6 7.6 0 0 1 10.6 4.6h2.8A7.6 7.6 0 0 1 21 12.2Z"/><path d="M9 12.2h.01M12 12.2h.01M15 12.2h.01"/></symbol>
+    <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M3 21.2 4.5 16.7A8.6 8.6 0 1 1 7.9 20L3 21.2Z"/><path d="M9 8.6c-.4 3 2.3 5.9 5.4 5.7l.9-1.4 2 1v1.5c-4.4.9-8.9-3.4-8-7.8h1.6l1 1.9-1.2.8Z"/></symbol>
+    <symbol id="i-bullhorn" viewBox="0 0 24 24"><path d="M3.5 10.2v3.6A1.6 1.6 0 0 0 5.1 15.4h2.6l7.5 4.6V4L7.7 8.6H5.1a1.6 1.6 0 0 0-1.6 1.6Z"/><path d="M18.5 8.4a5.2 5.2 0 0 1 0 7.2"/><path d="M7.7 15.4v3.5a1.6 1.6 0 0 0 3.1.4"/></symbol>
+    <symbol id="i-volume-high" viewBox="0 0 24 24"><path d="M4 9.4v5.2h3.4L12 18.6V5.4L7.4 9.4H4Z"/><path d="M15.4 9.2a4 4 0 0 1 0 5.6"/><path d="M18.2 6.4a8 8 0 0 1 0 11.2"/></symbol>
+    <symbol id="i-volume-low" viewBox="0 0 24 24"><path d="M4 9.4v5.2h3.4L12 18.6V5.4L7.4 9.4H4Z"/><path d="M15.4 9.2a4 4 0 0 1 0 5.6"/></symbol>
+    <symbol id="i-whistle" viewBox="0 0 24 24"><circle cx="8.6" cy="14" r="5.2"/><path d="M13.8 14h7.4l-1.8-3.4h-6"/><path d="M8.6 12.2v3.6"/><path d="M12 6.5 13.6 4"/></symbol>
+    <symbol id="i-headset" viewBox="0 0 24 24"><path d="M4 15.2v-3.4a8 8 0 0 1 16 0v3.4"/><rect x="2" y="13.6" width="4.4" height="6.6" rx="2"/><rect x="17.6" y="13.6" width="4.4" height="6.6" rx="2"/><path d="M19.8 20.2a2.8 2.8 0 0 1-2.8 2.3h-3.4"/></symbol>
+    <symbol id="i-suitcase-rolling" viewBox="0 0 24 24"><rect x="4.8" y="7" width="14.4" height="12" rx="2"/><path d="M9 7V4.6h6V7"/><path d="M9 19v2.2M15 19v2.2"/><path d="M12 7v12"/></symbol>
+    <symbol id="i-magnifying-glass" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.6"/><path d="M20.2 20.2 15.4 15.4"/></symbol>
+    <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="M3.2 8V5.8a1.6 1.6 0 0 1 1.6-1.6h4.1l2.1 2.6h6.2A1.6 1.6 0 0 1 18.8 8.4v1.4"/><path d="M3.2 8h17.2a1 1 0 0 1 1 1.2l-1.8 8.6a1.6 1.6 0 0 1-1.6 1.3H4.8a1.6 1.6 0 0 1-1.6-1.6V8Z"/></symbol>
+    <symbol id="i-fire-extinguisher" viewBox="0 0 24 24"><rect x="7" y="8.4" width="8" height="11.8" rx="2"/><path d="M9.4 8.4V6.2a1.6 1.6 0 0 1 3.2 0v2.2"/><path d="M15 11h3.2l1.4-4.4"/><path d="M10 4.2h2.6"/></symbol>
+    <symbol id="i-truck-medical" viewBox="0 0 24 24"><rect x="2.5" y="5.8" width="11.6" height="9.4" rx="1.6"/><path d="M14.1 8.8h3.7l3.2 3.2v3.2h-6.9"/><circle cx="7" cy="18.2" r="2"/><circle cx="17.4" cy="18.2" r="2"/><path d="M8.3 8v5M5.8 10.5h5"/></symbol>
+    <symbol id="i-user-secret" viewBox="0 0 24 24"><path d="M4.4 9.4h15.2"/><path d="M7.2 9.4 8.8 5.2A2 2 0 0 1 10.7 4h2.6a2 2 0 0 1 1.9 1.2l1.6 4.2"/><path d="M9 12.6h2.2M12.8 12.6H15"/><path d="M4 20.6a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-hospital" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="17.2" rx="1.6"/><path d="M12 7.6v5M9.5 10.1h5"/><path d="M9.4 21.2v-4.4h5.2v4.4"/></symbol>
+    <symbol id="i-user-tie" viewBox="0 0 24 24"><circle cx="12" cy="6.6" r="3.4"/><path d="M4.8 21.2a7.2 7.2 0 0 1 14.4 0"/><path d="m12 11 -1.6 2.4L12 18l1.6-4.6L12 11Z"/></symbol>
+    <symbol id="i-person-walking-arrow-right" viewBox="0 0 24 24"><circle cx="8.6" cy="4.4" r="2"/><path d="m5.6 21 2.6-6.2 2.4-1.8-1-4"/><path d="m6.2 10.4 3.4-2 2.4 2.2"/><path d="m10.8 21-1.4-4"/><path d="M15.6 14.2H21"/><path d="m19 12 2.2 2.2L19 16.4"/></symbol>
+    <symbol id="i-heart-pulse" viewBox="0 0 24 24"><path d="M19.2 13.6c1.1-1.3 1.8-2.7 1.8-4.2a4 4 0 0 0-7-2.6 4 4 0 0 0-7 2.6"/><path d="M7 9.4c0 4.4 5 8.4 5 8.4s2.4-1.9 4.2-4.2"/><path d="M2.6 12.4h3.6l1.4-2.4 2 4.8 1.8-3.2h3.4"/></symbol>
+    <symbol id="i-wheelchair" viewBox="0 0 24 24"><circle cx="9" cy="3.6" r="1.9"/><path d="M8 7.4v6h5.6"/><path d="m13.6 13.4 2.6 5.8h2.6"/><circle cx="9.6" cy="16.4" r="4.8"/></symbol>
+    <symbol id="i-trash-can" viewBox="0 0 24 24"><path d="M4 6.4h16"/><path d="M9.2 6.4V4.2h5.6v2.2"/><path d="m6.2 6.4.9 13.2a1.6 1.6 0 0 0 1.6 1.5h6.6a1.6 1.6 0 0 0 1.6-1.5l.9-13.2"/><path d="M10.2 10.6v6.4M13.8 10.6v6.4"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.7-6.6 10-6.6S22 12 22 12s-3.7 6.6-10 6.6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+    <symbol id="i-circle-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.2 12.3 2.8 2.7 5-5.6"/></symbol>
+    <symbol id="i-mobile-screen-button" viewBox="0 0 24 24"><rect x="6.4" y="2.4" width="11.2" height="19.2" rx="2.2"/><path d="M10.2 5.4h3.6"/><circle cx="12" cy="18.4" r="1"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.4 4.6 19 12 7.4 19.4V4.6Z"/></symbol>
+    </svg>
+
+    <noscript>
+        <div style="background:#7f1d1d;color:#fff;padding:12px;text-align:center;font-size:13px;">
+            Esta aplicación necesita JavaScript activado para funcionar. Actívalo en tu navegador y recarga la página.
+        </div>
+    </noscript>
 
     <div id="sr-live-region" class="sr-only" aria-live="assertive" aria-atomic="true" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;"></div>
 
@@ -100,7 +172,7 @@
             <!-- LOGO & TÍTULO -->
             <div class="flex items-center gap-2.5">
                 <div class="bg-chileRed text-white p-2 rounded-xl font-extrabold text-base flex items-center justify-center w-9 h-9 shadow-lg shadow-red-900/40">
-                    <i class="fa-solid fa-shield-halved"></i>
+                    <svg class="ic ic-lg" aria-hidden="true"><use href="#i-shield-halved"/></svg>
                 </div>
                 <div>
                     <h1 class="font-extrabold text-sm sm:text-base leading-tight flex items-center gap-1.5">
@@ -113,51 +185,53 @@
             <!-- MODOS DE NAVEGACIÓN -->
             <nav class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-semibold overflow-x-auto max-w-full">
                 <button id="nav-poe" onclick="switchMainSection('poe')" class="px-3 py-1.5 rounded-lg bg-chileBlue text-white transition flex items-center gap-1.5 shrink-0">
-                    <i class="fa-solid fa-bolt-lightning text-amber-400"></i> <span>POE AIDEP & ACCEDER</span>
+                    <svg class="ic text-amber-400" aria-hidden="true"><use href="#i-bolt-lightning"/></svg> <span>POE AIDEP & ACCEDER</span>
                 </button>
                 <button id="nav-sos" onclick="switchMainSection('sos')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> <span>Panel SOS & Estado</span>
+                    <svg class="ic text-amber-400" aria-hidden="true"><use href="#i-triangle-exclamation"/></svg> <span>Panel SOS & Estado</span>
                 </button>
                 <button id="nav-directorio" onclick="switchMainSection('directorio')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
-                    <i class="fa-solid fa-phone text-emerald-400"></i> <span>Directorio 24/7</span>
+                    <svg class="ic text-emerald-400" aria-hidden="true"><use href="#i-phone"/></svg> <span>Directorio 24/7</span>
                 </button>
                 <button id="nav-grave" onclick="switchMainSection('grave')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
-                    <i class="fa-solid fa-person-falling-burst text-rose-400"></i> <span>Accidente Grave</span>
+                    <svg class="ic text-rose-400" aria-hidden="true"><use href="#i-person-falling-burst"/></svg> <span>Accidente Grave</span>
                 </button>
                 <button id="nav-centro" onclick="switchMainSection('centro')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
-                    <i class="fa-solid fa-building text-blue-400"></i> <span>Ficha CGRD</span>
+                    <svg class="ic text-blue-400" aria-hidden="true"><use href="#i-building"/></svg> <span>Ficha CGRD</span>
                 </button>
                 <button id="nav-drill" onclick="switchMainSection('drill')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
-                    <i class="fa-solid fa-stopwatch text-cyan-400"></i> <span>Simulacro</span>
+                    <svg class="ic text-cyan-400" aria-hidden="true"><use href="#i-stopwatch"/></svg> <span>Simulacro</span>
                 </button>
             </nav>
 
             <!-- ACCIONES RÁPIDAS & BOTÓN DE INSTALACIÓN -->
             <div class="flex items-center gap-2">
-                <!-- Botón Instalar App (Visible dinámicamente) -->
-                <button id="btn-install-app" onclick="triggerPWAInstall()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-950/50 animate-bounce">
-                    <i class="fa-solid fa-download"></i> <span>Instalar App</span>
+                <!-- Estado de conexión -->
+                <span id="net-pill" class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border">
+                    <svg id="net-icon" class="ic" aria-hidden="true"><use href="#i-wifi"/></svg> <span id="net-text">En línea</span>
+                </span>
+
+                <!-- Botón Instalar App (siempre disponible: usa prompt nativo o instrucciones) -->
+                <button id="btn-install-app" onclick="handleInstallClick()" class="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-950/50">
+                    <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> <span id="lbl-install">Instalar app</span>
                 </button>
 
                 <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-file-pdf text-red-400"></i> <span class="hidden md:inline">Imprimir PDF</span>
+                    <svg class="ic text-red-400" aria-hidden="true"><use href="#i-file-pdf"/></svg> <span class="hidden md:inline">Imprimir PDF</span>
                 </button>
-                <a href="tel:6004200022" class="bg-chileRed hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-red-950/50">
-                    <i class="fa-solid fa-phone-volume"></i> <span class="hidden sm:inline">SUSESO:</span> 600 42 000 22
-                </a>
             </div>
         </div>
 
         <!-- BANNER DE ESTADO PERSISTENTE -->
         <div id="global-status-banner" class="no-print hidden border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold">
-            <i id="global-status-icon" class="fa-solid"></i>
+            <svg id="global-status-icon" class="ic" aria-hidden="true"><use href="#i-shield-heart"/></svg>
             <span id="global-status-text"></span>
         </div>
     </header>
 
     <!-- NOTIFICACIÓN TOAST -->
     <div id="toast" role="status" aria-live="polite" class="no-print fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs">
-        <i id="toast-icon" class="fa-solid fa-circle-info text-blue-400 text-base"></i>
+        <svg id="toast-icon" class="ic ic-lg text-blue-400" aria-hidden="true"><use href="#i-circle-info"/></svg>
         <span id="toast-message">Notificación</span>
     </div>
 
@@ -165,7 +239,7 @@
     <div id="message-preview-modal" class="no-print hidden fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="message-preview-title">
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 max-w-sm w-full text-white space-y-3.5 shadow-2xl">
             <div id="message-preview-title" class="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                <i class="fa-solid fa-eye"></i> Revisa el mensaje antes de enviarlo
+                <svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg> Revisa el mensaje antes de enviarlo
             </div>
             <div id="message-preview-recipient" class="text-xs text-slate-400"></div>
             <div id="message-preview-text" class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 whitespace-pre-wrap leading-relaxed"></div>
@@ -181,6 +255,19 @@
         </div>
     </div>
 
+    <!-- MODAL DE AYUDA PARA INSTALAR -->
+    <div id="install-help-modal" class="no-print hidden fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="install-help-title">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 max-w-md w-full text-white space-y-3.5 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div id="install-help-title" class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                <svg class="ic" aria-hidden="true"><use href="#i-mobile-screen-button"/></svg> Instalar la app en este dispositivo
+            </div>
+            <div id="install-help-body" class="text-xs text-slate-300 space-y-3 leading-relaxed"></div>
+            <button id="install-help-close" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs transition">
+                Entendido
+            </button>
+        </div>
+    </div>
+
     <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4">
 
         <!-- SECCIÓN 1: PROCEDIMIENTOS OPERATIVOS ESTANDARIZADOS (18 POES) -->
@@ -188,17 +275,10 @@
             
             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 shadow-xl flex flex-col md:flex-row gap-3 items-center justify-between no-print">
                 <div class="relative w-full md:w-96">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                    <input type="text" id="poeSearch" onkeyup="filterPoes()" placeholder="Buscar amenaza, POE o palabra clave..." class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500">
+                    <svg class="ic absolute left-3.5 top-3 text-slate-400 text-sm" aria-hidden="true"><use href="#i-magnifying-glass"/></svg>
+                    <input type="search" id="poeSearch" oninput="applyPoeFilters()" placeholder="Buscar amenaza, POE o palabra clave..." class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500">
                 </div>
-                <div class="flex items-center gap-1.5 flex-wrap w-full md:w-auto text-xs">
-                    <button onclick="filterCategory('todos', event)" class="cat-btn px-3 py-1.5 bg-chileBlue text-white rounded-lg font-bold shadow-xs">Todos (18)</button>
-                    <button onclick="filterCategory('Geológico', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Geológico</button>
-                    <button onclick="filterCategory('Incendio', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Incendio</button>
-                    <button onclick="filterCategory('Químico', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Químico / Ind.</button>
-                    <button onclick="filterCategory('Meteorológico', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Meteorológico</button>
-                    <button onclick="filterCategory('Antrópico', event)" class="cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800">Seguridad / Salud</button>
-                </div>
+                <div id="cat-filters" class="flex items-center gap-1.5 flex-wrap w-full md:w-auto text-xs"></div>
             </div>
 
             <div id="poeGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -219,33 +299,33 @@
 
                     <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
                         <button id="btn-status-safe" onclick="setUserStatus('safe')" class="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow">
-                            <i class="fa-solid fa-shield-heart"></i> Estoy a Salvo
+                            <svg class="ic" aria-hidden="true"><use href="#i-shield-heart"/></svg> Estoy a Salvo
                         </button>
                         <button id="btn-status-help" onclick="setUserStatus('help')" class="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-bold text-xs transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-hand-holding-medical"></i> Necesito Ayuda
+                            <svg class="ic" aria-hidden="true"><use href="#i-hand-holding-medical"/></svg> Necesito Ayuda
                         </button>
                     </div>
                 </div>
 
                 <div id="phone-warning" class="hidden mt-3 bg-amber-950/60 border border-amber-800/60 text-amber-300 rounded-xl p-2.5 text-[11px] flex items-center gap-2">
-                    <i class="fa-solid fa-triangle-exclamation shrink-0"></i>
+                    <svg class="ic shrink-0" aria-hidden="true"><use href="#i-triangle-exclamation"/></svg>
                     <span>No has registrado un contacto de emergencia. Complétalo en la ficha del centro / hogar para habilitar envíos rápidos.</span>
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
-                        <i class="fa-solid fa-share-nodes text-slate-500"></i>
+                        <svg class="ic text-slate-500" aria-hidden="true"><use href="#i-share-nodes"/></svg>
                         <span id="status-share-hint">Selecciona un estado arriba para poder avisarle a tu contacto.</span>
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <button id="btn-call-contact" onclick="callEmergencyContact()" class="hidden px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition items-center justify-center gap-2 animate-pulse">
-                            <i class="fa-solid fa-phone"></i> Llamar al Contacto Ahora
+                            <svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg> Llamar al Contacto Ahora
                         </button>
                         <button id="btn-share-sms" onclick="shareStatus('sms')" disabled class="px-3 py-2 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
-                            <i class="fa-solid fa-comment-sms"></i> Enviar por SMS
+                            <svg class="ic" aria-hidden="true"><use href="#i-comment-sms"/></svg> Enviar por SMS
                         </button>
                         <button id="btn-share-whatsapp" onclick="shareStatus('whatsapp')" disabled class="px-3 py-2 rounded-lg bg-slate-800 text-slate-500 font-bold text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
-                            <i class="fa-brands fa-whatsapp"></i> Enviar por WhatsApp
+                            <svg class="ic" aria-hidden="true"><use href="#i-whatsapp"/></svg> Enviar por WhatsApp
                         </button>
                     </div>
                 </div>
@@ -256,7 +336,7 @@
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold text-red-400 uppercase tracking-wider"><i class="fa-solid fa-bullhorn mr-1"></i> Auxilio Sonoro</span>
+                            <span class="text-xs font-bold text-red-400 uppercase tracking-wider"><svg class="ic mr-1" aria-hidden="true"><use href="#i-bullhorn"/></svg> Auxilio Sonoro</span>
                             <span class="text-[10px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800/50">Web Audio API</span>
                         </div>
                         <h3 class="font-bold text-base text-slate-100">Sirena & Silbato SOS</h3>
@@ -264,10 +344,10 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2 pt-2">
                         <button id="btn-siren" onclick="toggleSiren()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-red-900/30">
-                            <i class="fa-solid fa-volume-high"></i> <span id="lbl-siren">Activar Sirena</span>
+                            <svg class="ic" aria-hidden="true"><use href="#i-volume-high"/></svg> <span id="lbl-siren">Activar Sirena</span>
                         </button>
                         <button id="btn-whistle" onclick="toggleWhistle()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-amber-900/30">
-                            <i class="fa-solid fa-mattress-pillow"></i> <span id="lbl-whistle">Silbato SOS</span>
+                            <svg class="ic" aria-hidden="true"><use href="#i-whistle"/></svg> <span id="lbl-whistle">Silbato SOS</span>
                         </button>
                     </div>
                 </div>
@@ -275,7 +355,7 @@
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-location-dot mr-1"></i> GPS & SMS</span>
+                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider"><svg class="ic mr-1" aria-hidden="true"><use href="#i-location-dot"/></svg> GPS & SMS</span>
                             <span class="text-[10px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800/50">Sin Datos Móviles</span>
                         </div>
                         <h3 class="font-bold text-base text-slate-100">Enviar Ubicación GPS</h3>
@@ -283,13 +363,13 @@
                     </div>
                     <div class="space-y-2 pt-2">
                         <div class="flex items-center gap-2 text-[11px] bg-slate-900 p-2 rounded-lg border border-slate-800 text-slate-300 font-mono">
-                            <span class="truncate flex-1" id="gps-display">GPS: No localizado</span>
-                            <button type="button" onclick="initGeolocation()" title="Actualizar ubicación" class="shrink-0 px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
-                                <i class="fa-solid fa-rotate"></i>
+                            <span class="truncate flex-1" id="gps-display">GPS: toca actualizar</span>
+                            <button type="button" onclick="initGeolocation(true)" title="Actualizar ubicación" aria-label="Actualizar ubicación GPS" class="shrink-0 px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                                <svg class="ic" aria-hidden="true"><use href="#i-rotate"/></svg>
                             </button>
                         </div>
                         <button onclick="sendEmergencySMS()" class="w-full bg-chileBlue hover:bg-blue-600 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-blue-900/30">
-                            <i class="fa-solid fa-paper-plane"></i> Generar SMS con Coordenadas
+                            <svg class="ic" aria-hidden="true"><use href="#i-paper-plane"/></svg> Generar SMS con Coordenadas
                         </button>
                     </div>
                 </div>
@@ -297,7 +377,7 @@
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg" id="strobe-container">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-headset mr-1"></i> Voz & Destello</span>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><svg class="ic mr-1" aria-hidden="true"><use href="#i-headset"/></svg> Voz & Destello</span>
                             <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800/50">Asistencia Visual</span>
                         </div>
                         <h3 class="font-bold text-base text-slate-100">Guía Audible / Estrobo</h3>
@@ -305,10 +385,10 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2 pt-2">
                         <button id="btn-tts" onclick="speakEmergencySteps()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-volume-low"></i> <span id="lbl-tts">Guía Audible</span>
+                            <svg class="ic" aria-hidden="true"><use href="#i-volume-low"/></svg> <span id="lbl-tts">Guía Audible</span>
                         </button>
                         <button id="btn-strobe" onclick="toggleStrobe()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-bolt"></i> <span>Estrobo SOS</span>
+                            <svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg> <span id="lbl-strobe">Estrobo SOS</span>
                         </button>
                     </div>
                 </div>
@@ -318,7 +398,7 @@
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white space-y-4 shadow-xl">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <h3 class="font-bold text-base flex items-center gap-2 text-slate-100">
-                        <i class="fa-solid fa-suitcase-rolling text-amber-400"></i> Checklist Kit de Emergencia 72 Horas
+                        <svg class="ic text-amber-400" aria-hidden="true"><use href="#i-suitcase-rolling"/></svg> Checklist Kit de Emergencia 72 Horas
                     </h3>
                     <span id="app-kit-counter" class="text-xs font-bold text-amber-400 bg-amber-950/80 px-2.5 py-1 rounded-full border border-amber-800/50">0 / 9 Listos</span>
                 </div>
@@ -374,7 +454,7 @@
                 <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
                     <div>
                         <h2 class="font-black text-sm sm:text-base uppercase flex items-center gap-2 text-white">
-                            <i class="fa-solid fa-phone-volume text-chileRed"></i> Directorio Telefónico Oficial de Emergencias
+                            <svg class="ic text-chileRed" aria-hidden="true"><use href="#i-phone-volume"/></svg> Directorio Telefónico Oficial de Emergencias
                         </h2>
                         <p class="text-xs text-slate-400">Líneas de discado rápido 24/7 para el territorio nacional.</p>
                     </div>
@@ -384,59 +464,59 @@
                 <div class="divide-y divide-slate-800/80 text-xs">
                     <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
                         <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-red-950 text-red-400 border border-red-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-fire-extinguisher"></i></div>
+                            <div class="w-10 h-10 rounded-xl bg-red-950 text-red-400 border border-red-800/50 flex items-center justify-center font-bold text-lg"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-fire-extinguisher"/></svg></div>
                             <div>
                                 <h3 class="font-bold text-slate-100 text-sm">Cuerpo de Bomberos de Chile</h3>
                                 <p class="text-slate-400">Extinción de incendios, rescate vehicular/estructural, control de fugas de gas y HAZMAT.</p>
                             </div>
                         </div>
                         <a href="tel:132" class="px-5 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 shadow-md shadow-red-950">
-                            <i class="fa-solid fa-phone"></i> 132
+                            <svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg> 132
                         </a>
                     </div>
 
                     <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
                         <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-truck-medical"></i></div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-800/50 flex items-center justify-center font-bold text-lg"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-truck-medical"/></svg></div>
                             <div>
                                 <h3 class="font-bold text-slate-100 text-sm">SAMU (Ambulancias)</h3>
                                 <p class="text-slate-400">Atención médica prehospitalaria con riesgo vital y soporte avanzado de reanimación.</p>
                             </div>
                         </div>
                         <a href="tel:131" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 shadow-md shadow-emerald-950">
-                            <i class="fa-solid fa-phone"></i> 131
+                            <svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg> 131
                         </a>
                     </div>
 
                     <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
                         <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-950 text-blue-400 border border-blue-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div class="w-10 h-10 rounded-xl bg-blue-950 text-blue-400 border border-blue-800/50 flex items-center justify-center font-bold text-lg"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-shield-halved"/></svg></div>
                             <div>
                                 <h3 class="font-bold text-slate-100 text-sm">Carabineros de Chile</h3>
                                 <p class="text-slate-400">Asaltos, delitos en curso, control del orden público, resguardo perimetral y cortes de tránsito.</p>
                             </div>
                         </div>
                         <a href="tel:133" class="px-5 py-2 bg-chileBlue hover:bg-blue-600 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 shadow-md shadow-blue-950">
-                            <i class="fa-solid fa-phone"></i> 133
+                            <svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg> 133
                         </a>
                     </div>
 
                     <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
                         <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-slate-900 text-slate-300 border border-slate-700 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-user-secret"></i></div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-900 text-slate-300 border border-slate-700 flex items-center justify-center font-bold text-lg"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-user-secret"/></svg></div>
                             <div>
                                 <h3 class="font-bold text-slate-100 text-sm">PDI (Policía de Investigaciones)</h3>
                                 <p class="text-slate-400">Peritajes criminalísticos, investigación de delitos graves, sabotajes y atentados.</p>
                             </div>
                         </div>
                         <a href="tel:134" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 border border-slate-700">
-                            <i class="fa-solid fa-phone"></i> 134
+                            <svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg> 134
                         </a>
                     </div>
 
                     <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
                         <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-hospital"></i></div>
+                            <div class="w-10 h-10 rounded-xl bg-indigo-950 text-indigo-400 border border-indigo-800/50 flex items-center justify-center font-bold text-lg"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-hospital"/></svg></div>
                             <div>
                                 <h3 class="font-bold text-slate-100 text-sm">Mutualidades (Ley N° 16.744)</h3>
                                 <p class="text-slate-400">Rescate médico de trabajadores en faena y derivación de urgencia.</p>
@@ -451,14 +531,14 @@
 
                     <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-red-950/40 hover:bg-red-950/60 transition">
                         <div class="flex items-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-red-900 text-red-200 border border-red-700 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div class="w-10 h-10 rounded-xl bg-red-900 text-red-200 border border-red-700 flex items-center justify-center font-bold text-lg"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-triangle-exclamation"/></svg></div>
                             <div>
                                 <h3 class="font-bold text-red-200 text-sm">Call Center Notificación Accidente Grave / Fatal</h3>
                                 <p class="text-red-300">Plataforma telefónica única nacional obligatoria para informar suspensiones a DT y SEREMI.</p>
                             </div>
                         </div>
                         <a href="tel:6004200022" class="px-5 py-2 bg-chileRed hover:bg-red-600 text-white rounded-xl font-black text-sm text-center flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-red-950 animate-pulse">
-                            <i class="fa-solid fa-phone"></i> 600 42 000 22
+                            <svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg> 600 42 000 22
                         </a>
                     </div>
                 </div>
@@ -470,7 +550,7 @@
             <div class="bg-slate-950 border-2 border-red-800/80 rounded-2xl p-6 text-white shadow-2xl space-y-5">
                 <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
                     <div class="p-3 bg-red-600 text-white rounded-xl shadow-lg shadow-red-900/50 text-xl">
-                        <i class="fa-solid fa-bullhorn"></i>
+                        <svg class="ic ic-lg" aria-hidden="true"><use href="#i-bullhorn"/></svg>
                     </div>
                     <div>
                         <h2 class="text-base sm:text-lg font-black text-red-400 tracking-tight">PROTOCOLO ANTE ACCIDENTES GRAVES O FATALES</h2>
@@ -527,7 +607,7 @@
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white shadow-xl space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <h2 class="text-base font-bold text-slate-100 uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-building-circle-check text-blue-400"></i> Identificación del Centro de Trabajo y Estructura CGRD
+                        <svg class="ic text-blue-400" aria-hidden="true"><use href="#i-building-circle-check"/></svg> Identificación del Centro de Trabajo y Estructura CGRD
                     </h2>
                     <span class="text-xs text-slate-400">Guardado local seguro</span>
                 </div>
@@ -562,23 +642,23 @@
                 <h3 class="text-xs font-bold text-slate-300 uppercase mt-4 mb-2">Cadena de Mando y Roles Operativos en Emergencia</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
                     <div class="p-3 bg-blue-950/40 border border-blue-800/50 rounded-xl">
-                        <h4 class="font-bold text-blue-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-user-tie text-blue-400"></i> Comandante de Incidente</h4>
+                        <h4 class="font-bold text-blue-300 mb-1 flex items-center gap-1.5"><svg class="ic text-blue-400" aria-hidden="true"><use href="#i-user-tie"/></svg> Comandante de Incidente</h4>
                         <p class="text-slate-400">Máxima autoridad. Declara alerta/alarma, ordena desalojos y es portavoz ante Bomberos y SENAPRED.</p>
                     </div>
                     <div class="p-3 bg-amber-950/40 border border-amber-800/50 rounded-xl">
-                        <h4 class="font-bold text-amber-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-person-walking-arrow-right text-amber-400"></i> Monitores de Evacuación</h4>
+                        <h4 class="font-bold text-amber-300 mb-1 flex items-center gap-1.5"><svg class="ic text-amber-400" aria-hidden="true"><use href="#i-person-walking-arrow-right"/></svg> Monitores de Evacuación</h4>
                         <p class="text-slate-400">Verifican barrido de recintos, guían vías de escape y realizan censo nominal en la Zona de Seguridad.</p>
                     </div>
                     <div class="p-3 bg-red-950/40 border border-red-800/50 rounded-xl">
-                        <h4 class="font-bold text-red-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-fire-extinguisher text-red-400"></i> Brigada de Intervención</h4>
+                        <h4 class="font-bold text-red-300 mb-1 flex items-center gap-1.5"><svg class="ic text-red-400" aria-hidden="true"><use href="#i-fire-extinguisher"/></svg> Brigada de Intervención</h4>
                         <p class="text-slate-400">Corte preventivo de matrices (gas, luz, agua) y combate de conatos con extintores portátiles.</p>
                     </div>
                     <div class="p-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl">
-                        <h4 class="font-bold text-emerald-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-heart-pulse text-emerald-400"></i> Brigada Primeros Auxilios</h4>
+                        <h4 class="font-bold text-emerald-300 mb-1 flex items-center gap-1.5"><svg class="ic text-emerald-400" aria-hidden="true"><use href="#i-heart-pulse"/></svg> Brigada Primeros Auxilios</h4>
                         <p class="text-slate-400">Atención prehospitalaria, soporte RCP, aplicación de DEA (Ley 21.156) y contención de crisis.</p>
                     </div>
                     <div class="p-3 bg-purple-950/40 border border-purple-800/50 rounded-xl sm:col-span-2 lg:col-span-2">
-                        <h4 class="font-bold text-purple-300 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-wheelchair text-purple-400"></i> Asistencia PcD (Movilidad Reducida)</h4>
+                        <h4 class="font-bold text-purple-300 mb-1 flex items-center gap-1.5"><svg class="ic text-purple-400" aria-hidden="true"><use href="#i-wheelchair"/></svg> Asistencia PcD (Movilidad Reducida)</h4>
                         <p class="text-slate-400">Asignación 1:1 («sistema de parejas») para asistir, guiar o trasladar a personas con limitaciones motrices o sensoriales hacia la Zona de Seguridad.</p>
                     </div>
                 </div>
@@ -586,7 +666,7 @@
                 <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
                     <span class="text-[10px] text-slate-500">¿Usas este equipo en faena compartida? Borra los datos al terminar el turno.</span>
                     <button onclick="clearLocalData()" class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-red-900/60 text-slate-300 hover:text-red-300 border border-slate-700 font-bold text-[10px] transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-trash-can"></i> Borrar Datos
+                        <svg class="ic" aria-hidden="true"><use href="#i-trash-can"/></svg> Borrar Datos
                     </button>
                 </div>
             </div>
@@ -609,7 +689,7 @@
 
                 <div class="flex items-center justify-center gap-3">
                     <button id="btn-start-drill" onclick="startDrill()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-emerald-900/40">
-                        <i class="fa-solid fa-play mr-1.5"></i> Iniciar Simulacro
+                        <svg class="ic mr-1.5" aria-hidden="true"><use href="#i-play"/></svg> Iniciar Simulacro
                     </button>
                     <button onclick="resetDrill()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-3 rounded-xl text-xs transition">
                         Reiniciar
@@ -622,13 +702,16 @@
 
     <!-- FOOTER -->
     <footer class="no-print bg-slate-950 text-slate-500 text-[11px] py-4 border-t border-slate-800 text-center">
-        <div class="max-w-7xl mx-auto px-4">
-            Plan PRRD & Procedimientos POE • Cumplimiento Normativo Ley N° 21.364, D.S. N° 44 y D.S. N° 594
+        <div class="max-w-7xl mx-auto px-4 space-y-1">
+            <div>Plan PRRD & Procedimientos POE • Cumplimiento Normativo Ley N° 21.364, D.S. N° 44 y D.S. N° 594</div>
+            <div class="text-slate-600">Versión de la app: <span id="app-version">4.0</span> · <span id="install-state-text">Funciona sin conexión una vez instalada</span></div>
         </div>
     </footer>
 
     <!-- LOGICA JAVASCRIPT UNIFICADA -->
     <script>
+        const APP_VERSION = '4.1';
+
         const poesData = [
             {
                 id: 1,
@@ -804,22 +887,56 @@
         let currentGps = null;
         let currentGpsAt = null;
         let currentStatus = null;
+        let currentCategory = 'todos';
         let actionCooldownUntil = 0;
         const ACTION_COOLDOWN_MS = 4000;
         const AUDIO_FADE_SECONDS = 0.03;
+        const SIREN_VOLUME = 0.35;
+        const WHISTLE_VOLUME = 0.25;
+        const GPS_MAX_AGE_MIN = 5;
+
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const XLINK_NS = 'http://www.w3.org/1999/xlink';
+
+        function makeIcon(name, cls) {
+            const svg = document.createElementNS(SVG_NS, 'svg');
+            svg.setAttribute('class', cls || 'ic');
+            svg.setAttribute('aria-hidden', 'true');
+            const use = document.createElementNS(SVG_NS, 'use');
+            use.setAttribute('href', '#i-' + name);
+            use.setAttributeNS(XLINK_NS, 'xlink:href', '#i-' + name);
+            svg.appendChild(use);
+            return svg;
+        }
+
+        // Los SVG no aceptan element.className: hay que usar setAttribute.
+        function setIcon(el, name, cls) {
+            if (!el) return;
+            const use = el.querySelector('use');
+            if (use) {
+                use.setAttribute('href', '#i-' + name);
+                use.setAttributeNS(XLINK_NS, 'xlink:href', '#i-' + name);
+            }
+            if (cls) el.setAttribute('class', cls);
+        }
 
         /* PWA DEFERRED PROMPT */
         let deferredPrompt = null;
 
         document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('app-version').textContent = APP_VERSION;
+            renderCategoryFilters();
             renderPoes(poesData);
             loadCentroData();
-            initGeolocation();
             restoreLocalStatus();
             updatePhoneWarning();
             initKitCheckboxes();
             applyHashSection();
+            updateNetworkPill();
+            refreshInstallUI();
             window.addEventListener('hashchange', applyHashSection);
+            window.addEventListener('online', updateNetworkPill);
+            window.addEventListener('offline', updateNetworkPill);
 
             // Manejo de tecla ESC para modales
             document.addEventListener('keydown', (e) => {
@@ -828,58 +945,216 @@
                     if (!modal.classList.contains('hidden')) {
                         document.getElementById('message-preview-cancel').click();
                     }
+                    const help = document.getElementById('install-help-modal');
+                    if (!help.classList.contains('hidden')) {
+                        closeInstallHelp();
+                    }
                 }
             });
 
-            // Detección de soporte iOS Safari para sugerir instalación manual
-            const isIos = () => {
-                const userAgent = window.navigator.userAgent.toLowerCase();
-                return /iphone|ipad|ipod/.test(userAgent);
-            };
-            const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-
-            if (isIos() && !isInStandaloneMode()) {
-                const btnInstall = document.getElementById('btn-install-app');
-                btnInstall.classList.remove('hidden');
-                btnInstall.onclick = () => {
-                    alert("Para instalar en iPhone/iPad:\n1. Pulsa el botón Compartir (cuadrado con flecha).\n2. Selecciona 'Agregar a pantalla de inicio'.");
-                };
-            }
+            document.getElementById('install-help-close').addEventListener('click', closeInstallHelp);
         });
 
-        /* CAPTURA DE EVENTO DE INSTALACIÓN PWA (ANDROID / CHROME / EDGE / DESKTOP) */
+        /* ============================================================ */
+        /* INSTALACIÓN DE LA APP (PC Y CELULAR)                          */
+        /* ============================================================ */
+
+        function isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+                   window.navigator.standalone === true;
+        }
+
+        function detectPlatform() {
+            const ua = navigator.userAgent;
+            const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            if (isIOS) return 'ios';
+            if (/Android/i.test(ua)) return 'android';
+            if (/Firefox/i.test(ua)) return 'firefox';
+            return 'desktop';
+        }
+
+        function refreshInstallUI() {
+            const btn = document.getElementById('btn-install-app');
+            const lbl = document.getElementById('lbl-install');
+            const stateText = document.getElementById('install-state-text');
+            if (isStandalone()) {
+                btn.classList.add('hidden');
+                stateText.textContent = 'App instalada en este dispositivo · funciona sin conexión';
+            } else {
+                btn.classList.remove('hidden');
+                lbl.textContent = deferredPrompt ? 'Instalar app' : 'Cómo instalar';
+                if (deferredPrompt) {
+                    btn.classList.add('animate-bounce');
+                } else {
+                    btn.classList.remove('animate-bounce');
+                }
+            }
+        }
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            const btnInstall = document.getElementById('btn-install-app');
-            if (btnInstall) {
-                btnInstall.classList.remove('hidden');
-            }
+            refreshInstallUI();
         });
-
-        async function triggerPWAInstall() {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                showToast("¡Aplicación instalada exitosamente!", "success");
-            }
-            deferredPrompt = null;
-            const btnInstall = document.getElementById('btn-install-app');
-            if (btnInstall) btnInstall.classList.add('hidden');
-        }
 
         window.addEventListener('appinstalled', () => {
-            showToast("Aplicación instalada con éxito", "success");
-            const btnInstall = document.getElementById('btn-install-app');
-            if (btnInstall) btnInstall.classList.add('hidden');
+            deferredPrompt = null;
+            showToast('App instalada. Ya puedes abrirla desde el escritorio o la pantalla de inicio.', 'success');
+            refreshInstallUI();
         });
+
+        async function handleInstallClick() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                if (outcome === 'accepted') {
+                    showToast('Instalando la app...', 'success');
+                } else {
+                    showToast('Instalación cancelada. Puedes hacerlo más tarde con este mismo botón.');
+                }
+                refreshInstallUI();
+                return;
+            }
+            openInstallHelp();
+        }
+
+        const INSTALL_STEPS = {
+            ios: [
+                ['iPhone o iPad (Safari)', [
+                    'Abre esta página en Safari (no funciona desde Chrome ni desde Instagram/WhatsApp).',
+                    'Toca el botón Compartir, el cuadrado con la flecha hacia arriba.',
+                    'Desliza y elige "Agregar a pantalla de inicio".',
+                    'Confirma con "Agregar". El ícono queda junto al resto de tus apps.'
+                ]]
+            ],
+            android: [
+                ['Android (Chrome)', [
+                    'Toca el menú de tres puntos, arriba a la derecha.',
+                    'Elige "Instalar aplicación" o "Agregar a pantalla principal".',
+                    'Confirma. La app se abre a pantalla completa, sin barra del navegador.'
+                ]]
+            ],
+            desktop: [
+                ['PC con Chrome o Edge', [
+                    'Mira el ícono de instalación (una pantalla con una flecha) al final de la barra de direcciones y haz clic.',
+                    'Si no aparece: menú de tres puntos → "Enviar, guardar y compartir" o "Aplicaciones" → "Instalar esta página como aplicación".',
+                    'Confirma con "Instalar". Queda como acceso directo en el escritorio y en el menú de inicio.'
+                ]]
+            ],
+            firefox: [
+                ['PC con Firefox', [
+                    'Firefox de escritorio no instala aplicaciones web.',
+                    'Abre esta página en Chrome, Edge o Brave para instalarla.',
+                    'Mientras tanto puedes guardarla como marcador y usar "Imprimir PDF" para la copia en papel.'
+                ]]
+            ]
+        };
+
+        function openInstallHelp() {
+            const platform = detectPlatform();
+            const body = document.getElementById('install-help-body');
+            body.innerHTML = '';
+
+            const blocks = INSTALL_STEPS[platform] || INSTALL_STEPS.desktop;
+            blocks.forEach(([heading, steps]) => {
+                const h = document.createElement('h4');
+                h.className = 'font-bold text-slate-100 text-xs uppercase tracking-wide';
+                h.textContent = heading;
+                const ol = document.createElement('ol');
+                ol.className = 'list-decimal list-inside space-y-1.5 text-slate-300';
+                steps.forEach(s => {
+                    const li = document.createElement('li');
+                    li.textContent = s;
+                    ol.appendChild(li);
+                });
+                body.appendChild(h);
+                body.appendChild(ol);
+            });
+
+            const note = document.createElement('p');
+            note.className = 'text-[11px] text-amber-300 border-t border-slate-800 pt-3';
+            note.textContent = 'Instálala una vez con conexión: los procedimientos, el directorio y las herramientas SOS quedan guardados y siguen funcionando sin internet.';
+            body.appendChild(note);
+
+            const modal = document.getElementById('install-help-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('install-help-close').focus();
+        }
+
+        function closeInstallHelp() {
+            const modal = document.getElementById('install-help-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function updateNetworkPill() {
+            const pill = document.getElementById('net-pill');
+            const icon = document.getElementById('net-icon');
+            const text = document.getElementById('net-text');
+            if (navigator.onLine) {
+                pill.className = 'hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border bg-slate-900 text-slate-400 border-slate-800';
+                setIcon(icon, 'wifi');
+                text.textContent = 'En línea';
+            } else {
+                pill.className = 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border bg-amber-950/70 text-amber-300 border-amber-800/60';
+                setIcon(icon, 'wifi-off');
+                text.textContent = 'Sin conexión · modo offline';
+            }
+        }
+
+        /* ============================================================ */
+        /* POE: RENDER Y FILTROS                                         */
+        /* ============================================================ */
+
+        function renderCategoryFilters() {
+            const cats = ['todos', ...Array.from(new Set(poesData.map(p => p.cat)))];
+            const labels = { todos: `Todos (${poesData.length})`, 'Químico': 'Químico / Ind.', 'Antrópico': 'Seguridad / Salud' };
+            const cont = document.getElementById('cat-filters');
+            cont.innerHTML = '';
+            cats.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.cat = cat;
+                btn.textContent = labels[cat] || cat;
+                btn.className = cat === 'todos'
+                    ? 'cat-btn px-3 py-1.5 bg-chileBlue text-white rounded-lg font-bold'
+                    : 'cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800';
+                btn.addEventListener('click', () => filterCategory(cat));
+                cont.appendChild(btn);
+            });
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                const active = b.dataset.cat === cat;
+                b.className = active
+                    ? 'cat-btn px-3 py-1.5 bg-chileBlue text-white rounded-lg font-bold'
+                    : 'cat-btn px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg font-medium border border-slate-800';
+            });
+            applyPoeFilters();
+        }
+
+        function applyPoeFilters() {
+            const q = (document.getElementById('poeSearch').value || '').toLowerCase().trim();
+            const filtered = poesData.filter(p => {
+                const matchCat = currentCategory === 'todos' || p.cat === currentCategory;
+                if (!matchCat) return false;
+                if (!q) return true;
+                return [p.title, p.norma, p.prep, p.dur, p.rec].some(f => f.toLowerCase().includes(q));
+            });
+            renderPoes(filtered);
+        }
 
         function renderPoes(list) {
             const grid = document.getElementById('poeGrid');
             grid.innerHTML = '';
             if (list.length === 0) {
-                grid.innerHTML = '<div class="col-span-2 text-center py-12 text-slate-500 text-xs bg-slate-950 rounded-2xl border border-slate-800"><i class="fa-solid fa-folder-open text-3xl mb-2"></i><p>No se encontraron planes que coincidan con la búsqueda.</p></div>';
+                grid.innerHTML = '<div class="md:col-span-2 text-center py-12 text-slate-500 text-xs bg-slate-950 rounded-2xl border border-slate-800"><svg class="ic mb-2" style="width:2.5rem;height:2.5rem" aria-hidden="true"><use href="#i-folder-open"/></svg><p>No hay procedimientos que coincidan. Prueba con otra palabra o vuelve a "Todos".</p></div>';
                 return;
             }
             list.forEach(poe => {
@@ -889,10 +1164,10 @@
                     <div>
                         <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
                             <div class="flex items-center gap-2.5">
-                                <span class="w-6 h-6 rounded-lg bg-chileBlue text-yellow-300 font-extrabold text-xs flex items-center justify-center">${poe.id}</span>
+                                <span class="w-6 h-6 rounded-lg bg-chileBlue text-yellow-300 font-extrabold text-xs flex items-center justify-center shrink-0">${poe.id}</span>
                                 <h3 class="font-bold text-xs leading-tight tracking-wide text-slate-100">${poe.title}</h3>
                             </div>
-                            <span class="text-[9px] uppercase font-bold text-blue-300 bg-blue-950 px-2 py-0.5 rounded border border-blue-800/50">${poe.cat}</span>
+                            <span class="text-[9px] uppercase font-bold text-blue-300 bg-blue-950 px-2 py-0.5 rounded border border-blue-800/50 shrink-0">${poe.cat}</span>
                         </div>
                         <div class="p-4 space-y-3 text-xs">
                             <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-800/80">
@@ -917,37 +1192,6 @@
             });
         }
 
-        function filterPoes() {
-            const q = document.getElementById('poeSearch').value.toLowerCase();
-            const filtered = poesData.filter(p => 
-                p.title.toLowerCase().includes(q) || 
-                p.norma.toLowerCase().includes(q) || 
-                p.prep.toLowerCase().includes(q) || 
-                p.dur.toLowerCase().includes(q) || 
-                p.rec.toLowerCase().includes(q)
-            );
-            renderPoes(filtered);
-        }
-
-        function filterCategory(cat, evt) {
-            document.querySelectorAll('.cat-btn').forEach(b => {
-                b.classList.remove('bg-chileBlue', 'text-white');
-                b.classList.add('bg-slate-900', 'text-slate-300');
-            });
-            const target = evt ? evt.target : null;
-            if (target) {
-                target.classList.remove('bg-slate-900', 'text-slate-300');
-                target.classList.add('bg-chileBlue', 'text-white');
-            }
-
-            if (cat === 'todos') {
-                renderPoes(poesData);
-            } else {
-                const filtered = poesData.filter(p => p.cat.toLowerCase().includes(cat.toLowerCase()));
-                renderPoes(filtered);
-            }
-        }
-
         const MAIN_SECTIONS = ['poe', 'sos', 'directorio', 'grave', 'centro', 'drill'];
 
         function switchMainSection(target) {
@@ -965,6 +1209,11 @@
             if (target && window.location.hash !== `#${target}`) {
                 history.replaceState(null, '', `#${target}`);
             }
+            // El GPS se solicita solo cuando el Panel SOS se abre: evita el bloqueo
+            // automático del permiso al cargar la página.
+            if (target === 'sos' && !currentGps) {
+                initGeolocation(false);
+            }
         }
 
         function applyHashSection() {
@@ -981,17 +1230,18 @@
 
             toastMsg.textContent = msg;
             if (type === 'error') {
-                toastIcon.className = 'fa-solid fa-triangle-exclamation text-red-400 text-base';
+                setIcon(toastIcon, 'triangle-exclamation', 'ic ic-lg text-red-400');
             } else if (type === 'success') {
-                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
+                setIcon(toastIcon, 'circle-check', 'ic ic-lg text-emerald-400');
             } else {
-                toastIcon.className = 'fa-solid fa-circle-info text-blue-400 text-base';
+                setIcon(toastIcon, 'circle-info', 'ic ic-lg text-blue-400');
             }
 
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => {
                 toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            }, 3500);
         }
 
         function announceToScreenReader(msg) {
@@ -1000,8 +1250,18 @@
             setTimeout(() => { region.textContent = msg; }, 50);
         }
 
-        function toggleSiren() {
+        /* ============================================================ */
+        /* AUDIO SOS                                                     */
+        /* ============================================================ */
+
+        function ensureAudioCtx() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function toggleSiren() {
+            ensureAudioCtx();
             if (sirenOsc) {
                 stopSiren();
                 showToast("Sirena detenida");
@@ -1016,7 +1276,7 @@
                 sirenOsc.frequency.linearRampToValueAtTime(1200, now + 0.5);
 
                 sirenGain.gain.setValueAtTime(0, now);
-                sirenGain.gain.linearRampToValueAtTime(1, now + AUDIO_FADE_SECONDS);
+                sirenGain.gain.linearRampToValueAtTime(SIREN_VOLUME, now + AUDIO_FADE_SECONDS);
 
                 sirenOsc.connect(sirenGain);
                 sirenGain.connect(audioCtx.destination);
@@ -1032,7 +1292,7 @@
 
                 document.getElementById('lbl-siren').textContent = 'Detener Sirena';
                 document.getElementById('btn-siren').classList.add('animate-pulse');
-                showToast("Sirena SOS activada a alto volumen", "error");
+                showToast("Sirena SOS activada. Sube el volumen del equipo.", "error");
             }
         }
 
@@ -1061,7 +1321,7 @@
         }
 
         function toggleWhistle() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            ensureAudioCtx();
             if (whistleOsc) {
                 const t = audioCtx.currentTime;
                 const oscToStop = whistleOsc;
@@ -1089,7 +1349,7 @@
 
                 const now = audioCtx.currentTime;
                 whistleGain.gain.setValueAtTime(0, now);
-                whistleGain.gain.linearRampToValueAtTime(1, now + AUDIO_FADE_SECONDS);
+                whistleGain.gain.linearRampToValueAtTime(WHISTLE_VOLUME, now + AUDIO_FADE_SECONDS);
 
                 whistleOsc.connect(whistleGain);
                 whistleGain.connect(audioCtx.destination);
@@ -1103,7 +1363,7 @@
 
         function toggleStrobe() {
             const container = document.getElementById('strobe-container');
-            const btn = document.getElementById('btn-strobe');
+            const lbl = document.getElementById('lbl-strobe');
             if (!isStrobeOn) {
                 const confirmed = window.confirm("Esta luz parpadea en rojo y blanco.\nPuede afectar a personas fotosensibles o con epilepsia.\n¿Confirmas activarla?");
                 if (!confirmed) return;
@@ -1111,31 +1371,53 @@
             isStrobeOn = !isStrobeOn;
             if (isStrobeOn) {
                 container.classList.add('strobe-active');
-                btn.textContent = 'Detener';
+                lbl.textContent = 'Detener destello';
                 showToast("Estrobo visual activado", "error");
             } else {
                 container.classList.remove('strobe-active');
-                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>Estrobo SOS</span>';
+                lbl.textContent = 'Estrobo SOS';
             }
         }
 
-        function initGeolocation() {
-            if ("geolocation" in navigator) {
-                document.getElementById('gps-display').textContent = 'GPS: Localizando...';
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        currentGps = { lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5) };
-                        currentGpsAt = new Date();
-                        document.getElementById('gps-display').textContent = `GPS: ${currentGps.lat}, ${currentGps.lng}`;
-                    },
-                    (err) => {
-                        document.getElementById('gps-display').textContent = 'GPS: Sin señal / denegado';
-                    }
-                );
-            } else {
-                document.getElementById('gps-display').textContent = 'GPS: No disponible';
+        /* ============================================================ */
+        /* GEOLOCALIZACIÓN                                               */
+        /* ============================================================ */
+
+        function initGeolocation(showFeedback) {
+            const display = document.getElementById('gps-display');
+            if (!('geolocation' in navigator)) {
+                display.textContent = 'GPS: no disponible en este equipo';
+                return;
             }
+            display.textContent = 'GPS: localizando...';
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    currentGps = { lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5) };
+                    currentGpsAt = new Date();
+                    display.textContent = `GPS: ${currentGps.lat}, ${currentGps.lng}`;
+                    if (showFeedback) showToast('Ubicación actualizada', 'success');
+                },
+                (err) => {
+                    if (err.code === 1) {
+                        display.textContent = 'GPS: permiso denegado';
+                        if (showFeedback) showToast('Activa el permiso de ubicación para este sitio en tu navegador.', 'error');
+                    } else {
+                        display.textContent = 'GPS: sin señal, reintenta al aire libre';
+                        if (showFeedback) showToast('No se obtuvo señal. Reintenta al aire libre.', 'error');
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+            );
         }
+
+        function gpsAgeMinutes() {
+            if (!currentGpsAt) return null;
+            return Math.round((Date.now() - currentGpsAt.getTime()) / 60000);
+        }
+
+        /* ============================================================ */
+        /* MENSAJERÍA DE ESTADO                                          */
+        /* ============================================================ */
 
         function buildSmsHref(phone, body) {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -1169,10 +1451,16 @@
             actionCooldownUntil = Date.now() + ACTION_COOLDOWN_MS;
         }
 
+        function statusLabel(status) {
+            return status === 'help' ? '¡NECESITO AYUDA EN EL ÁREA!' : 'Estoy a salvo en la Zona de Seguridad';
+        }
+
         function buildStatusMessage(statusText) {
             const address = document.getElementById('app-input-address').value || 'nuestro centro de trabajo';
+            const meeting = document.getElementById('app-input-meeting').value;
             const coordsStr = currentGps ? `https://maps.google.com/?q=${currentGps.lat},${currentGps.lng}` : '';
-            return `[ALERTA EMERGENCIA PRRD] ${statusText}. Ubicación: ${address}. ${coordsStr}`.trim();
+            const place = meeting ? `${address} (punto de encuentro: ${meeting})` : address;
+            return `[ALERTA EMERGENCIA PRRD] ${statusText}. Ubicación: ${place}. ${coordsStr}`.trim();
         }
 
         let messagePreviewLastFocused = null;
@@ -1187,8 +1475,7 @@
             recipientEl.textContent = `Destinatario: ${recipient}`;
             textEl.textContent = text;
             noteEl.textContent = '';
-            const icon = document.createElement('i');
-            icon.className = 'fa-solid fa-location-dot mt-0.5';
+            const icon = makeIcon('location-dot', 'ic mt-0.5');
             const span = document.createElement('span');
             span.textContent = locationNote;
             noteEl.appendChild(icon);
@@ -1219,21 +1506,36 @@
 
         async function confirmStatusMessage(phone, statusText) {
             const msg = buildStatusMessage(statusText);
-            const locationNote = currentGps
-                ? `Se incluirá ubicación GPS exacta (${currentGpsAt ? currentGpsAt.toLocaleTimeString('es-CL') : 'reciente'}).`
-                : 'No se obtuvo GPS; se enviará solo la dirección configurada.';
+            const age = gpsAgeMinutes();
+            let locationNote;
+            if (!currentGps) {
+                locationNote = 'No hay ubicación GPS: se enviará solo la dirección registrada en la Ficha CGRD.';
+            } else if (age !== null && age > GPS_MAX_AGE_MIN) {
+                locationNote = `Atención: la ubicación tiene ${age} minutos de antigüedad. Actualízala si te has movido.`;
+            } else {
+                locationNote = `Incluye ubicación GPS de las ${currentGpsAt ? currentGpsAt.toLocaleTimeString('es-CL') : 'ahora'}.`;
+            }
             const confirmed = await showMessagePreview({ recipient: phone, text: msg, locationNote });
             return confirmed ? msg : null;
         }
 
-        async function sendEmergencySMS() {
-            if (isOnCooldown()) return;
+        function getValidatedPhone() {
             const phone = (document.getElementById('app-input-phone').value || '').trim();
             if (!phone || !isPlausiblePhone(phone)) {
-                showToast("Ingresa un teléfono válido en la Ficha CGRD", "error");
-                return;
+                showToast("Registra un teléfono válido en la Ficha CGRD", "error");
+                switchMainSection('centro');
+                document.getElementById('app-input-phone').focus();
+                return null;
             }
-            const msg = await confirmStatusMessage(phone, 'Estoy a salvo en la Zona de Seguridad');
+            return phone;
+        }
+
+        async function sendEmergencySMS() {
+            if (isOnCooldown()) return;
+            const phone = getValidatedPhone();
+            if (!phone) return;
+            // Usa el estado real seleccionado; antes enviaba siempre "estoy a salvo".
+            const msg = await confirmStatusMessage(phone, statusLabel(currentStatus));
             if (!msg) { showToast("Envío cancelado"); return; }
             startCooldown();
             window.location.href = buildSmsHref(phone, msg);
@@ -1245,13 +1547,9 @@
                 showToast("Selecciona primero tu estado arriba", "error");
                 return;
             }
-            const phone = (document.getElementById('app-input-phone').value || '').trim();
-            if (!phone || !isPlausiblePhone(phone)) {
-                showToast("Ingresa un teléfono válido en la Ficha CGRD", "error");
-                return;
-            }
-            const statusText = currentStatus === 'safe' ? 'Estoy a salvo' : '¡NECESITO AYUDA EN EL ÁREA!';
-            const msg = await confirmStatusMessage(phone, statusText);
+            const phone = getValidatedPhone();
+            if (!phone) return;
+            const msg = await confirmStatusMessage(phone, statusLabel(currentStatus));
             if (!msg) { showToast("Envío cancelado"); return; }
             startCooldown();
             if (channel === 'whatsapp') {
@@ -1264,11 +1562,8 @@
 
         async function callEmergencyContact() {
             if (isOnCooldown()) return;
-            const phone = (document.getElementById('app-input-phone').value || '').trim();
-            if (!phone || !isPlausiblePhone(phone)) {
-                showToast("Ingresa un teléfono válido en la Ficha CGRD", "error");
-                return;
-            }
+            const phone = getValidatedPhone();
+            if (!phone) return;
             const confirmed = await showMessagePreview({
                 recipient: phone,
                 text: `Se iniciará llamada directa a ${phone}.`,
@@ -1292,12 +1587,17 @@
                 utterance.rate = 0.95;
                 utterance.onstart = () => { document.getElementById('lbl-tts').textContent = 'Detener Voz'; };
                 utterance.onend = () => { document.getElementById('lbl-tts').textContent = 'Guía Audible'; };
+                utterance.onerror = () => { document.getElementById('lbl-tts').textContent = 'Guía Audible'; };
                 window.speechSynthesis.speak(utterance);
                 showToast("Reproduciendo guía audible");
             } else {
-                showToast("Navegador sin síntesis de voz", "error");
+                showToast("Este navegador no tiene síntesis de voz", "error");
             }
         }
+
+        /* ============================================================ */
+        /* SIMULACRO                                                     */
+        /* ============================================================ */
 
         let drillTimer = null;
         let drillSeconds = 60;
@@ -1310,6 +1610,7 @@
 
             btn.disabled = true;
             btn.classList.add('opacity-50');
+            timerEl.textContent = '00:60';
 
             if ('speechSynthesis' in window) {
                 const startSpeech = new SpeechSynthesisUtterance("Inicio de simulacro de emergencia. Atención a brigadistas y monitores.");
@@ -1357,6 +1658,10 @@
             btn.classList.remove('opacity-50');
         }
 
+        /* ============================================================ */
+        /* DATOS LOCALES                                                 */
+        /* ============================================================ */
+
         function saveCentroData() {
             const fields = ['address', 'commune', 'meeting', 'safezone', 'contact', 'phone'];
             const data = {};
@@ -1371,7 +1676,8 @@
         }
 
         function loadCentroData() {
-            const saved = localStorage.getItem('prrd_centro_data');
+            let saved = null;
+            try { saved = localStorage.getItem('prrd_centro_data'); } catch (e) {}
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
@@ -1385,9 +1691,11 @@
 
         function clearLocalData() {
             if (!window.confirm('¿Borrar todos los datos de faena y checklist guardados en este navegador?')) return;
-            localStorage.removeItem('prrd_centro_data');
-            localStorage.removeItem('prrd_kit_checklist');
-            sessionStorage.removeItem('prrd_last_status');
+            try {
+                localStorage.removeItem('prrd_centro_data');
+                localStorage.removeItem('prrd_kit_checklist');
+                sessionStorage.removeItem('prrd_last_status');
+            } catch (e) {}
 
             const fields = ['address', 'commune', 'meeting', 'safezone', 'contact', 'phone'];
             fields.forEach(f => {
@@ -1411,7 +1719,7 @@
                 state[cb.dataset.kitItem] = cb.checked;
             });
             const total = cbs.length;
-            const pct = Math.round((checked / total) * 100);
+            const pct = total ? Math.round((checked / total) * 100) : 0;
             document.getElementById('app-kit-counter').textContent = `${checked} / ${total} Listos`;
             document.getElementById('app-kit-bar').style.width = `${pct}%`;
             try {
@@ -1420,7 +1728,8 @@
         }
 
         function initKitCheckboxes() {
-            const saved = localStorage.getItem('prrd_kit_checklist');
+            let saved = null;
+            try { saved = localStorage.getItem('prrd_kit_checklist'); } catch (e) {}
             if (saved) {
                 try {
                     const state = JSON.parse(saved);
@@ -1435,7 +1744,8 @@
         }
 
         function restoreLocalStatus() {
-            const status = sessionStorage.getItem('prrd_last_status');
+            let status = null;
+            try { status = sessionStorage.getItem('prrd_last_status'); } catch (e) {}
             if (status === 'safe' || status === 'help') {
                 applyStatusUI(status, { silent: true });
             }
@@ -1464,7 +1774,7 @@
                 btnCall.classList.add('hidden');
                 btnCall.classList.remove('flex');
                 globalBanner.className = 'no-print flex border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold bg-emerald-950/60 text-emerald-300';
-                globalIcon.className = 'fa-solid fa-shield-heart';
+                setIcon(globalIcon, 'shield-heart');
                 globalText.textContent = 'Estado Operativo: Estoy a Salvo';
             } else if (status === 'help') {
                 btnHelp.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-red-600 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow';
@@ -1476,7 +1786,7 @@
                 btnCall.classList.remove('hidden');
                 btnCall.classList.add('flex');
                 globalBanner.className = 'no-print flex border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold bg-red-950/70 text-red-300 animate-pulse';
-                globalIcon.className = 'fa-solid fa-hand-holding-medical';
+                setIcon(globalIcon, 'hand-holding-medical');
                 globalText.textContent = 'Estado Operativo: NECESITO AYUDA';
             } else {
                 btnSafe.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow';
@@ -1504,7 +1814,7 @@
 
         window.setUserStatus = function(status) {
             applyStatusUI(status);
-            sessionStorage.setItem('prrd_last_status', status);
+            try { sessionStorage.setItem('prrd_last_status', status); } catch (e) {}
         };
     </script>
 
@@ -1513,7 +1823,17 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('Service Worker registrado correctamente:', reg.scope))
+                    .then((reg) => {
+                        reg.addEventListener('updatefound', () => {
+                            const nuevo = reg.installing;
+                            if (!nuevo) return;
+                            nuevo.addEventListener('statechange', () => {
+                                if (nuevo.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showToast('Hay una versión nueva. Cierra y vuelve a abrir la app.', 'info');
+                                }
+                            });
+                        });
+                    })
                     .catch((err) => console.error('Error registrando Service Worker:', err));
             });
         }

@@ -1,24 +1,28 @@
 /* =========================================================
    PRRD & POE App - Service Worker
-   v5 · Funcionamiento sin conexión en PC y celular
+   v6 · Funcionamiento sin conexión en PC y celular
+
+   Cambio respecto a v5: la instalación ya no se aborta si falta
+   un archivo (por ejemplo, un ícono guardado en otra carpeta).
+   Solo index.html es obligatorio; el resto se guarda si existe.
    ========================================================= */
 
-const CACHE_VERSION = 'prrd-poe-v5';
-const CACHE_RUNTIME = 'prrd-poe-runtime-v5';
+const CACHE_VERSION = 'prrd-poe-v6';
+const CACHE_RUNTIME = 'prrd-poe-runtime-v6';
 
-/* Archivos propios de la app: si alguno falta, la instalación falla,
-   así que solo van los que están sí o sí en el repositorio. */
-const CORE_ASSETS = [
+/* Lo único imprescindible para que la app abra sin conexión. */
+const CORE_REQUIRED = './index.html';
+
+/* Deseables: se intentan uno por uno y ninguno bloquea la instalación.
+   Se listan las dos rutas posibles de los íconos (raíz y carpeta icons/),
+   así funciona estén donde estén. */
+const OPTIONAL_ASSETS = [
   './',
-  './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
-];
-
-/* Recursos externos (CDN). Los íconos ya no dependen de ningún CDN:
-   van como SVG dentro del propio index.html. */
-const CDN_ASSETS = [
+  './icon-512.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
 ];
@@ -26,9 +30,8 @@ const CDN_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_VERSION);
-    await cache.addAll(CORE_ASSETS);
-    // Los externos se intentan uno por uno: si un CDN falla, la app igual se instala.
-    await Promise.all(CDN_ASSETS.map(url =>
+    await cache.add(new Request(CORE_REQUIRED, { cache: 'reload' }));
+    await Promise.all(OPTIONAL_ASSETS.map(url =>
       cache.add(new Request(url, { cache: 'reload' })).catch(() => null)
     ));
     self.skipWaiting();

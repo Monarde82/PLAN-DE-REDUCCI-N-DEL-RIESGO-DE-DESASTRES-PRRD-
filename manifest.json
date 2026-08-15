@@ -1,47 +1,37 @@
 {
-  "name": "PRRD & POE App - Gestión del Riesgo y Emergencias",
-  "short_name": "PRRD & POE",
-  "description": "Procedimientos operativos estandarizados, directorio de emergencias y herramientas SOS conforme a la Ley N° 21.364, D.S. N° 44 y D.S. N° 594.",
-  "id": "./index.html",
+  "name": "Inspección de Condiciones Subestándar - SST",
+  "short_name": "SST Inspección",
+  "description": "Registro y notificación por correo de hallazgos de condiciones subestándar en Seguridad y Salud en el Trabajo",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
-  "background_color": "#0f172a",
-  "theme_color": "#002b7f",
-  "lang": "es-CL",
+  "background_color": "#f0f3f8",
+  "theme_color": "#0052a3",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "./icons/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icons/icon-512.png",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icons/icon-maskable-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Panel SOS",
-      "short_name": "SOS",
-      "description": "Ir directo a sirena, silbato, GPS y estado personal",
-      "url": "./index.html#sos"
-    },
-    {
-      "name": "Directorio 24/7",
-      "short_name": "Directorio",
-      "description": "Ir directo a los teléfonos de emergencia",
-      "url": "./index.html#directorio"
     }
   ]
 }

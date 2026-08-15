@@ -6,15 +6,17 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self';">
     <title>PRRD & POE App - Gestión del Riesgo y Emergencias</title>
 
-    <!-- PWA & Metadatos -->
+    <!-- PWA & Metadatos Multiplataforma (PC & Móvil) -->
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <meta name="theme-color" content="#002b7f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="PRRD & POE">
+    <meta name="application-name" content="PRRD & POE Chile">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -87,11 +89,10 @@
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans min-h-screen antialiased pb-16 selection:bg-red-500 selection:text-white">
 
-    <!-- Región viva para lectores de pantalla -->
     <div id="sr-live-region" class="sr-only" aria-live="assertive" aria-atomic="true" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;"></div>
 
     <!-- ========================================================================= -->
-    <!-- NAVEGACIÓN SUPERIOR FIJA -->
+    <!-- NAVEGACIÓN SUPERIOR FIJA CON BOTÓN DE DESCARGA / INSTALACIÓN -->
     <!-- ========================================================================= -->
     <header class="no-print bg-slate-950 text-white sticky top-0 z-50 border-b border-slate-800 shadow-xl">
         <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
@@ -131,8 +132,13 @@
                 </button>
             </nav>
 
-            <!-- ACCIONES RÁPIDAS -->
+            <!-- ACCIONES RÁPIDAS & BOTÓN DE INSTALACIÓN -->
             <div class="flex items-center gap-2">
+                <!-- Botón Instalar App (Visible dinámicamente) -->
+                <button id="btn-install-app" onclick="triggerPWAInstall()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-950/50 animate-bounce">
+                    <i class="fa-solid fa-download"></i> <span>Instalar App</span>
+                </button>
+
                 <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
                     <i class="fa-solid fa-file-pdf text-red-400"></i> <span class="hidden md:inline">Imprimir PDF</span>
                 </button>
@@ -180,7 +186,6 @@
         <!-- SECCIÓN 1: PROCEDIMIENTOS OPERATIVOS ESTANDARIZADOS (18 POES) -->
         <section id="section-poe" class="space-y-4">
             
-            <!-- BUSCADOR & FILTROS -->
             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 shadow-xl flex flex-col md:flex-row gap-3 items-center justify-between no-print">
                 <div class="relative w-full md:w-96">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
@@ -196,14 +201,11 @@
                 </div>
             </div>
 
-            <!-- GRILLA DINÁMICA POE -->
             <div id="poeGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </section>
 
         <!-- SECCIÓN 2: PANEL SOS, HERRAMIENTAS Y ESTADO PERSONAL -->
         <section id="section-sos" class="hidden space-y-5">
-
-            <!-- ESTADO PERSONAL LOCAL -->
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white shadow-xl">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="space-y-1">
@@ -251,8 +253,6 @@
 
             <!-- HERRAMIENTAS ACTIVAS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                <!-- SIRENA & SILBATO -->
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg">
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -272,7 +272,6 @@
                     </div>
                 </div>
 
-                <!-- GPS & COORDENADAS -->
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg">
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -295,7 +294,6 @@
                     </div>
                 </div>
 
-                <!-- LUZ DE ESTROBO / SÍNTESIS DE VOZ -->
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg" id="strobe-container">
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -314,10 +312,9 @@
                         </button>
                     </div>
                 </div>
-
             </div>
 
-            <!-- KIT DE EMERGENCIA 72H INTERACTIVO -->
+            <!-- CHECKLIST KIT DE EMERGENCIA -->
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white space-y-4 shadow-xl">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                     <h3 class="font-bold text-base flex items-center gap-2 text-slate-100">
@@ -369,7 +366,6 @@
                     </label>
                 </div>
             </div>
-
         </section>
 
         <!-- SECCIÓN 3: DIRECTORIO TELEFÓNICO OFICIAL 24/7 -->
@@ -386,7 +382,6 @@
                 </div>
                 
                 <div class="divide-y divide-slate-800/80 text-xs">
-                    
                     <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
                         <div class="flex items-start gap-3">
                             <div class="w-10 h-10 rounded-xl bg-red-950 text-red-400 border border-red-800/50 flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-fire-extinguisher"></i></div>
@@ -466,7 +461,6 @@
                             <i class="fa-solid fa-phone"></i> 600 42 000 22
                         </a>
                     </div>
-
                 </div>
             </div>
         </section>
@@ -485,7 +479,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-                    
                     <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between space-y-2">
                         <div>
                             <span class="w-6 h-6 rounded-full bg-red-600 text-white font-bold inline-flex items-center justify-center mb-2">1</span>
@@ -525,7 +518,6 @@
                             <p class="text-slate-400 leading-relaxed">Investigación técnica conjunta CPHS y SST. La reanudación requiere acreditación fiscalizadora.</p>
                         </div>
                     </div>
-
                 </div>
             </div>
         </section>
@@ -816,6 +808,9 @@
         const ACTION_COOLDOWN_MS = 4000;
         const AUDIO_FADE_SECONDS = 0.03;
 
+        /* PWA DEFERRED PROMPT */
+        let deferredPrompt = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             renderPoes(poesData);
             loadCentroData();
@@ -826,6 +821,7 @@
             applyHashSection();
             window.addEventListener('hashchange', applyHashSection);
 
+            // Manejo de tecla ESC para modales
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     const modal = document.getElementById('message-preview-modal');
@@ -834,6 +830,49 @@
                     }
                 }
             });
+
+            // Detección de soporte iOS Safari para sugerir instalación manual
+            const isIos = () => {
+                const userAgent = window.navigator.userAgent.toLowerCase();
+                return /iphone|ipad|ipod/.test(userAgent);
+            };
+            const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+            if (isIos() && !isInStandaloneMode()) {
+                const btnInstall = document.getElementById('btn-install-app');
+                btnInstall.classList.remove('hidden');
+                btnInstall.onclick = () => {
+                    alert("Para instalar en iPhone/iPad:\n1. Pulsa el botón Compartir (cuadrado con flecha).\n2. Selecciona 'Agregar a pantalla de inicio'.");
+                };
+            }
+        });
+
+        /* CAPTURA DE EVENTO DE INSTALACIÓN PWA (ANDROID / CHROME / EDGE / DESKTOP) */
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btnInstall = document.getElementById('btn-install-app');
+            if (btnInstall) {
+                btnInstall.classList.remove('hidden');
+            }
+        });
+
+        async function triggerPWAInstall() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                showToast("¡Aplicación instalada exitosamente!", "success");
+            }
+            deferredPrompt = null;
+            const btnInstall = document.getElementById('btn-install-app');
+            if (btnInstall) btnInstall.classList.add('hidden');
+        }
+
+        window.addEventListener('appinstalled', () => {
+            showToast("Aplicación instalada con éxito", "success");
+            const btnInstall = document.getElementById('btn-install-app');
+            if (btnInstall) btnInstall.classList.add('hidden');
         });
 
         function renderPoes(list) {
@@ -1469,13 +1508,13 @@
         };
     </script>
 
-    <!-- SERVICE WORKER PWA -->
+    <!-- REGISTRO DEL SERVICE WORKER -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('Service Worker registrado:', reg.scope))
-                    .catch((err) => console.error('Error Service Worker:', err));
+                    .then((reg) => console.log('Service Worker registrado correctamente:', reg.scope))
+                    .catch((err) => console.error('Error registrando Service Worker:', err));
             });
         }
     </script>

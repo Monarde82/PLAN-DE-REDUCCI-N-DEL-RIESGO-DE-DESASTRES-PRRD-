@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self';">
     <title>PRRD & POE App - Gestión del Riesgo y Emergencias</title>
 
     <!-- PWA & Metadatos -->
     <link rel="manifest" href="./manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
-    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
     <meta name="theme-color" content="#002b7f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -177,9 +177,7 @@
 
     <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4">
 
-        <!-- ========================================================================= -->
         <!-- SECCIÓN 1: PROCEDIMIENTOS OPERATIVOS ESTANDARIZADOS (18 POES) -->
-        <!-- ========================================================================= -->
         <section id="section-poe" class="space-y-4">
             
             <!-- BUSCADOR & FILTROS -->
@@ -199,14 +197,10 @@
             </div>
 
             <!-- GRILLA DINÁMICA POE -->
-            <div id="poeGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Se inyecta mediante JS -->
-            </div>
+            <div id="poeGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </section>
 
-        <!-- ========================================================================= -->
         <!-- SECCIÓN 2: PANEL SOS, HERRAMIENTAS Y ESTADO PERSONAL -->
-        <!-- ========================================================================= -->
         <section id="section-sos" class="hidden space-y-5">
 
             <!-- ESTADO PERSONAL LOCAL -->
@@ -266,7 +260,7 @@
                             <span class="text-[10px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800/50">Web Audio API</span>
                         </div>
                         <h3 class="font-bold text-base text-slate-100">Sirena & Silbato SOS</h3>
-                        <p class="text-xs text-slate-400 mt-1">Emite frecuencias de 600-1200Hz o silbato de 2800Hz para localización bajo escombros o en naves oscuras.</p>
+                        <p class="text-xs text-slate-400 mt-1">Emite frecuencias de 600-1200Hz o silbato de 2800Hz para localización bajo escombros o en áreas oscuras.</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2 pt-2">
                         <button id="btn-siren" onclick="toggleSiren()" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-red-900/30">
@@ -378,9 +372,7 @@
 
         </section>
 
-        <!-- ========================================================================= -->
         <!-- SECCIÓN 3: DIRECTORIO TELEFÓNICO OFICIAL 24/7 -->
-        <!-- ========================================================================= -->
         <section id="section-directorio" class="hidden space-y-4">
             <div class="bg-slate-950 rounded-2xl border border-slate-800 shadow-xl overflow-hidden text-white">
                 <div class="bg-slate-900 px-5 py-4 border-b border-slate-800 flex items-center justify-between">
@@ -479,9 +471,7 @@
             </div>
         </section>
 
-        <!-- ========================================================================= -->
         <!-- SECCIÓN 4: PROTOCOLO ACCIDENTE GRAVE O FATAL (CIRCULAR N° 3333) -->
-        <!-- ========================================================================= -->
         <section id="section-grave" class="hidden space-y-4">
             <div class="bg-slate-950 border-2 border-red-800/80 rounded-2xl p-6 text-white shadow-2xl space-y-5">
                 <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
@@ -540,9 +530,7 @@
             </div>
         </section>
 
-        <!-- ========================================================================= -->
         <!-- SECCIÓN 5: FICHA DEL CENTRO & COMITÉ CGRD -->
-        <!-- ========================================================================= -->
         <section id="section-centro" class="hidden space-y-5">
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-white shadow-xl space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -612,9 +600,7 @@
             </div>
         </section>
 
-        <!-- ========================================================================= -->
         <!-- SECCIÓN 6: SIMULACRO GUIADO POR VOZ -->
-        <!-- ========================================================================= -->
         <section id="section-drill" class="hidden space-y-5 max-w-2xl mx-auto">
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-white text-center space-y-4 shadow-2xl">
                 <div class="inline-block bg-emerald-950 text-emerald-400 border border-emerald-800/50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
@@ -649,11 +635,8 @@
         </div>
     </footer>
 
-    <!-- ========================================================================= -->
     <!-- LOGICA JAVASCRIPT UNIFICADA -->
-    <!-- ========================================================================= -->
     <script>
-        // 18 PLANES POE OFICIALES
         const poesData = [
             {
                 id: 1,
@@ -819,7 +802,6 @@
             }
         ];
 
-        // VARIABLES DE ESTADO Y AUDIO
         let audioCtx = null;
         let sirenOsc = null;
         let sirenGain = null;
@@ -854,7 +836,6 @@
             });
         });
 
-        // RENDER DE TARJETAS POE
         function renderPoes(list) {
             const grid = document.getElementById('poeGrid');
             grid.innerHTML = '';
@@ -947,9 +928,6 @@
             }
         }
 
-        // Permite abrir la app directo en una sección vía accesos directos del
-        // manifest (ej. clic derecho en el ícono instalado -> "Panel SOS") o
-        // un enlace tipo index.html#sos.
         function applyHashSection() {
             const hash = (window.location.hash || '').replace('#', '');
             if (MAIN_SECTIONS.includes(hash)) {
@@ -983,7 +961,6 @@
             setTimeout(() => { region.textContent = msg; }, 50);
         }
 
-        // SIRENA SOS
         function toggleSiren() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (sirenOsc) {
@@ -1044,7 +1021,6 @@
             document.getElementById('btn-siren').classList.remove('animate-pulse');
         }
 
-        // SILBATO
         function toggleWhistle() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (whistleOsc) {
@@ -1086,7 +1062,6 @@
             }
         }
 
-        // ESTROBO
         function toggleStrobe() {
             const container = document.getElementById('strobe-container');
             const btn = document.getElementById('btn-strobe');
@@ -1105,7 +1080,6 @@
             }
         }
 
-        // GPS
         function initGeolocation() {
             if ("geolocation" in navigator) {
                 document.getElementById('gps-display').textContent = 'GPS: Localizando...';
@@ -1125,7 +1099,6 @@
         }
 
         function buildSmsHref(phone, body) {
-            // iOS usa "&body=" y Android usa "?body=" para prellenar el SMS
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const separator = isIOS ? '&' : '?';
             return `sms:${encodeURIComponent(phone)}${separator}body=${encodeURIComponent(body)}`;
@@ -1267,7 +1240,6 @@
             window.location.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
         }
 
-        // TEXT TO SPEECH
         function speakEmergencySteps() {
             if ('speechSynthesis' in window) {
                 if (window.speechSynthesis.speaking) {
@@ -1288,7 +1260,6 @@
             }
         }
 
-        // SIMULACRO
         let drillTimer = null;
         let drillSeconds = 60;
         function startDrill() {
@@ -1347,7 +1318,6 @@
             btn.classList.remove('opacity-50');
         }
 
-        // GUARDADO FICHA CGRD
         function saveCentroData() {
             const fields = ['address', 'commune', 'meeting', 'safezone', 'contact', 'phone'];
             const data = {};
@@ -1393,7 +1363,6 @@
             showToast('Datos locales eliminados');
         }
 
-        // CHECKBOXES KIT 72H
         function syncKitCheckboxes() {
             const cbs = document.querySelectorAll('.app-kit-cb');
             let checked = 0;
@@ -1426,7 +1395,6 @@
             syncKitCheckboxes();
         }
 
-        // ESTADO PERSONAL
         function restoreLocalStatus() {
             const status = sessionStorage.getItem('prrd_last_status');
             if (status === 'safe' || status === 'help') {

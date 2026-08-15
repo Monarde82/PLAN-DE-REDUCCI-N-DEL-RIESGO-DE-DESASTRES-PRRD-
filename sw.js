@@ -8,8 +8,19 @@
 // la CSP `connect-src 'self'` del documento HTML (esa directiva rige los
 // fetch/XHR hechos DESDE la página, no los que hace el propio Service
 // Worker). Por eso sí puede cachear los CDNs sin violar la CSP del sitio.
+//
+// IMPORTANTE (fix v3): los archivos de fuente (.woff2) que carga
+// Font Awesome vía @font-face están sujetos a la restricción CORS
+// específica de fuentes: el navegador exige una respuesta CORS válida
+// (con Access-Control-Allow-Origin), no una respuesta "opaca". Si se
+// usa fetch(..., { mode: 'no-cors' }) se obtiene una respuesta opaca y
+// el navegador descarta silenciosamente la fuente -> los íconos se ven
+// como cuadraditos vacíos aunque el CSS haya cargado bien.
+// cdnjs.cloudflare.com y fonts.gstatic.com ya envían
+// Access-Control-Allow-Origin: *, así que un fetch normal (modo 'cors',
+// que es el default) funciona perfecto y además es cacheable igual.
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const SHELL_CACHE = `prrd-poe-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `prrd-poe-runtime-${CACHE_VERSION}`;
 
@@ -39,10 +50,12 @@ self.addEventListener('install', (event) => {
       // Precarga best-effort: si alguno falla (ej. sin internet en el
       // momento de instalar el Service Worker), no bloquea la instalación;
       // simplemente se cacheará más adelante en el primer fetch exitoso.
+      // Modo 'cors' (default): cdnjs y fonts.googleapis ya permiten CORS,
+      // así que obtenemos respuestas reales (no opacas) y cacheables.
       await Promise.all(
         EXTERNAL_SHELL.map((url) =>
-          fetch(url, { mode: 'no-cors' })
-            .then((resp) => runtimeCache.put(url, resp))
+          fetch(url)
+            .then((resp) => resp.ok && runtimeCache.put(url, resp))
             .catch(() => {})
         )
       );
@@ -99,9 +112,15 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.open(RUNTIME_CACHE).then(async (cache) => {
         const cached = await cache.match(event.request);
-        const networkFetch = fetch(event.request, { mode: 'no-cors' })
+
+        // Modo 'cors' (default, sin forzar no-cors): estos hosts sí
+        // soportan CORS, así que obtenemos una respuesta 'cors' real y
+        // válida para @font-face en vez de una opaca. Las respuestas
+        // opacas son rechazadas por el navegador para recursos de tipo
+        // "font", que es justo lo que causaba los íconos vacíos.
+        const networkFetch = fetch(event.request)
           .then((response) => {
-            cache.put(event.request, response.clone());
+            if (response.ok) cache.put(event.request, response.clone());
             return response;
           })
           .catch(() => null);

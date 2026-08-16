@@ -4,19 +4,18 @@
    Sube CACHE_VERSION cada vez que edites index.html para forzar la actualización.
    ============================================================================ */
 
-const CACHE_VERSION = 'prrd-poe-v4';
+const CACHE_VERSION = 'prrd-poe-v5';
 const CORE_CACHE = CACHE_VERSION + '-core';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 
-/* Archivos propios: si uno falla, la instalación completa falla, por eso van aparte. */
-const CACHE_VERSION = 'prrd-poe-v5';
-
+/* Lo mínimo imprescindible: si esto falla, la app no puede abrirse sin conexión. */
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json'
 ];
 
+/* Deseables: si alguno falta, se omite sin romper la instalación del service worker. */
 const OPTIONAL_ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -36,7 +35,7 @@ self.addEventListener('install', (event) => {
     const cache = await caches.open(CORE_CACHE);
     await cache.addAll(CORE_ASSETS);
     await Promise.allSettled(
-      EXTERNAL_ASSETS.map(async (url) => {
+      [...OPTIONAL_ASSETS, ...EXTERNAL_ASSETS].map(async (url) => {
         try {
           const res = await fetch(url, { cache: 'reload' });
           if (res && res.ok) await cache.put(url, res.clone());

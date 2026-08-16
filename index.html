@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="color-scheme" content="dark">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none';">
-    <title>PRRD & POE App - Gestión del Riesgo y Emergencias</title>
+    <title>PRRD &amp; POE App - Gestión del Riesgo y Emergencias</title>
     <meta name="description" content="Aplicación instalable de Plan de Reducción del Riesgo de Desastres y Procedimientos Operativos Estandarizados para centros de trabajo en Chile.">
 
     <!-- PWA & Metadatos Multiplataforma (PC & Móvil) -->
     <link rel="manifest" href="./manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="./icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
     <meta name="theme-color" content="#002b7f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -102,8 +103,14 @@
         }
         .ic-lg { width: 1.4em; height: 1.4em; }
 
-        /* Respaldo mínimo si el CDN de Tailwind no alcanza a cargar (modo sin conexión el primer arranque) */
+        /* Respaldo mínimo si el CDN de Tailwind no alcanza a cargar (primer arranque sin conexión) */
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+
+        /* Respeta el notch/gestos en iPhone y Android cuando la app corre en pantalla completa */
+        header { padding-top: env(safe-area-inset-top); }
+        main { padding-left: max(0.75rem, env(safe-area-inset-left)); padding-right: max(0.75rem, env(safe-area-inset-right)); }
+        footer { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+        #install-bar { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans min-h-screen antialiased pb-16 selection:bg-red-500 selection:text-white">
@@ -153,6 +160,7 @@
     <symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.2 12.3 2.8 2.7 5-5.6"/></symbol>
     <symbol id="i-mobile-screen-button" viewBox="0 0 24 24"><rect x="6.4" y="2.4" width="11.2" height="19.2" rx="2.2"/><path d="M10.2 5.4h3.6"/><circle cx="12" cy="18.4" r="1"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.4 4.6 19 12 7.4 19.4V4.6Z"/></symbol>
+    <symbol id="i-xmark" viewBox="0 0 24 24"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5"/></symbol>
     </svg>
 
     <noscript>
@@ -176,7 +184,7 @@
                 </div>
                 <div>
                     <h1 class="font-extrabold text-sm sm:text-base leading-tight flex items-center gap-1.5">
-                        PRRD & POE APP <span class="bg-chileBlue text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Chile</span>
+                        PRRD &amp; POE APP <span class="bg-chileBlue text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Chile</span>
                     </h1>
                     <p class="text-[10px] text-slate-400">Ley N° 21.364 · D.S. N° 44 · D.S. N° 594 · Circ. N° 3333</p>
                 </div>
@@ -185,10 +193,10 @@
             <!-- MODOS DE NAVEGACIÓN -->
             <nav class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-semibold overflow-x-auto max-w-full">
                 <button id="nav-poe" onclick="switchMainSection('poe')" class="px-3 py-1.5 rounded-lg bg-chileBlue text-white transition flex items-center gap-1.5 shrink-0">
-                    <svg class="ic text-amber-400" aria-hidden="true"><use href="#i-bolt-lightning"/></svg> <span>POE AIDEP & ACCEDER</span>
+                    <svg class="ic text-amber-400" aria-hidden="true"><use href="#i-bolt-lightning"/></svg> <span>POE AIDEP &amp; ACCEDER</span>
                 </button>
                 <button id="nav-sos" onclick="switchMainSection('sos')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
-                    <svg class="ic text-amber-400" aria-hidden="true"><use href="#i-triangle-exclamation"/></svg> <span>Panel SOS & Estado</span>
+                    <svg class="ic text-amber-400" aria-hidden="true"><use href="#i-triangle-exclamation"/></svg> <span>Panel SOS &amp; Estado</span>
                 </button>
                 <button id="nav-directorio" onclick="switchMainSection('directorio')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 shrink-0">
                     <svg class="ic text-emerald-400" aria-hidden="true"><use href="#i-phone"/></svg> <span>Directorio 24/7</span>
@@ -227,7 +235,31 @@
             <svg id="global-status-icon" class="ic" aria-hidden="true"><use href="#i-shield-heart"/></svg>
             <span id="global-status-text"></span>
         </div>
+
+        <!-- AVISO DE VERSIÓN NUEVA DISPONIBLE -->
+        <div id="update-banner" class="no-print hidden border-t border-slate-800/80 bg-blue-950/70 text-blue-200 px-3 sm:px-4 py-1.5 items-center justify-between gap-2 text-xs font-bold">
+            <span class="flex items-center gap-2">
+                <svg class="ic" aria-hidden="true"><use href="#i-rotate"/></svg>
+                Hay una versión nueva de la app.
+            </span>
+            <button id="btn-update-now" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition">Actualizar ahora</button>
+        </div>
     </header>
+
+    <!-- BARRA INFERIOR DE INSTALACIÓN (aparece solo si la app aún no está instalada) -->
+    <div id="install-bar" class="no-print hidden fixed bottom-0 inset-x-0 z-40 bg-slate-950/95 backdrop-blur border-t border-emerald-800/60 px-3 pt-3 shadow-2xl">
+        <div class="max-w-3xl mx-auto flex items-center gap-3">
+            <svg class="ic ic-lg text-emerald-400 shrink-0" aria-hidden="true"><use href="#i-mobile-screen-button"/></svg>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-slate-100">Instala la app en este dispositivo</p>
+                <p class="text-[11px] text-slate-400 leading-snug">Queda como ícono propio y funciona sin conexión en faena.</p>
+            </div>
+            <button onclick="handleInstallClick()" class="shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-xl transition">Instalar</button>
+            <button onclick="dismissInstallBar()" aria-label="Cerrar aviso de instalación" class="shrink-0 text-slate-500 hover:text-slate-300 p-2 transition">
+                <svg class="ic" aria-hidden="true"><use href="#i-xmark"/></svg>
+            </button>
+        </div>
+    </div>
 
     <!-- NOTIFICACIÓN TOAST -->
     <div id="toast" role="status" aria-live="polite" class="no-print fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs">
@@ -272,10 +304,11 @@
 
         <!-- SECCIÓN 1: PROCEDIMIENTOS OPERATIVOS ESTANDARIZADOS (18 POES) -->
         <section id="section-poe" class="space-y-4">
-            
+
             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 shadow-xl flex flex-col md:flex-row gap-3 items-center justify-between no-print">
                 <div class="relative w-full md:w-96">
                     <svg class="ic absolute left-3.5 top-3 text-slate-400 text-sm" aria-hidden="true"><use href="#i-magnifying-glass"/></svg>
+                    <label for="poeSearch" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Buscar procedimiento</label>
                     <input type="search" id="poeSearch" oninput="applyPoeFilters()" placeholder="Buscar amenaza, POE o palabra clave..." class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500">
                 </div>
                 <div id="cat-filters" class="flex items-center gap-1.5 flex-wrap w-full md:w-auto text-xs"></div>
@@ -339,7 +372,7 @@
                             <span class="text-xs font-bold text-red-400 uppercase tracking-wider"><svg class="ic mr-1" aria-hidden="true"><use href="#i-bullhorn"/></svg> Auxilio Sonoro</span>
                             <span class="text-[10px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800/50">Web Audio API</span>
                         </div>
-                        <h3 class="font-bold text-base text-slate-100">Sirena & Silbato SOS</h3>
+                        <h3 class="font-bold text-base text-slate-100">Sirena &amp; Silbato SOS</h3>
                         <p class="text-xs text-slate-400 mt-1">Emite frecuencias de 600-1200Hz o silbato de 2800Hz para localización bajo escombros o en áreas oscuras.</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2 pt-2">
@@ -355,7 +388,7 @@
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider"><svg class="ic mr-1" aria-hidden="true"><use href="#i-location-dot"/></svg> GPS & SMS</span>
+                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider"><svg class="ic mr-1" aria-hidden="true"><use href="#i-location-dot"/></svg> GPS &amp; SMS</span>
                             <span class="text-[10px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800/50">Sin Datos Móviles</span>
                         </div>
                         <h3 class="font-bold text-base text-slate-100">Enviar Ubicación GPS</h3>
@@ -377,7 +410,7 @@
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white flex flex-col justify-between space-y-3 shadow-lg" id="strobe-container">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><svg class="ic mr-1" aria-hidden="true"><use href="#i-headset"/></svg> Voz & Destello</span>
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><svg class="ic mr-1" aria-hidden="true"><use href="#i-headset"/></svg> Voz &amp; Destello</span>
                             <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800/50">Asistencia Visual</span>
                         </div>
                         <h3 class="font-bold text-base text-slate-100">Guía Audible / Estrobo</h3>
@@ -426,7 +459,7 @@
                     </label>
                     <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
                         <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="botiquin" onchange="syncKitCheckboxes()">
-                        <span>🩹 Botiquín & Inmovilizadores</span>
+                        <span>🩹 Botiquín &amp; Inmovilizadores</span>
                     </label>
                     <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
                         <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="llaves" onchange="syncKitCheckboxes()">
@@ -434,7 +467,7 @@
                     </label>
                     <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
                         <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="documentos" onchange="syncKitCheckboxes()">
-                        <span>📋 Planos, HDS & Nóminas</span>
+                        <span>📋 Planos, HDS &amp; Nóminas</span>
                     </label>
                     <label class="flex items-center gap-2 p-2.5 bg-slate-900 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700">
                         <input type="checkbox" class="app-kit-cb rounded border-slate-700 text-amber-500 focus:ring-0" data-kit-item="mascota" onchange="syncKitCheckboxes()">
@@ -460,7 +493,7 @@
                     </div>
                     <span class="text-xs font-bold text-blue-300 bg-blue-950 px-2.5 py-1 rounded-lg border border-blue-800/50 hidden sm:inline">Chile</span>
                 </div>
-                
+
                 <div class="divide-y divide-slate-800/80 text-xs">
                     <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/50 transition">
                         <div class="flex items-start gap-3">
@@ -594,7 +627,7 @@
                     <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-between space-y-2">
                         <div>
                             <span class="w-6 h-6 rounded-full bg-red-600 text-white font-bold inline-flex items-center justify-center mb-2">5</span>
-                            <h4 class="font-bold text-slate-100 mb-1">Investigación & Cierre</h4>
+                            <h4 class="font-bold text-slate-100 mb-1">Investigación &amp; Cierre</h4>
                             <p class="text-slate-400 leading-relaxed">Investigación técnica conjunta CPHS y SST. La reanudación requiere acreditación fiscalizadora.</p>
                         </div>
                     </div>
@@ -619,7 +652,7 @@
                     </div>
                     <div>
                         <label class="block text-slate-400 mb-1 font-semibold" for="app-input-commune">📍 Comuna / Región:</label>
-                        <input type="text" id="app-input-commune" maxlength="80" oninput="saveCentroData()" placeholder="Ej: Rancagua, Región de O'Higgins" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" id="app-input-commune" maxlength="80" oninput="saveCentroData()" placeholder="Ej: Iquique, Región de Tarapacá" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-slate-400 mb-1 font-semibold" for="app-input-meeting">🔲 Punto de Encuentro / Zona Segura:</label>
@@ -703,14 +736,14 @@
     <!-- FOOTER -->
     <footer class="no-print bg-slate-950 text-slate-500 text-[11px] py-4 border-t border-slate-800 text-center">
         <div class="max-w-7xl mx-auto px-4 space-y-1">
-            <div>Plan PRRD & Procedimientos POE • Cumplimiento Normativo Ley N° 21.364, D.S. N° 44 y D.S. N° 594</div>
-            <div class="text-slate-600">Versión de la app: <span id="app-version">4.0</span> · <span id="install-state-text">Funciona sin conexión una vez instalada</span></div>
+            <div>Plan PRRD &amp; Procedimientos POE • Cumplimiento Normativo Ley N° 21.364, D.S. N° 44 y D.S. N° 594</div>
+            <div class="text-slate-600">Versión de la app: <span id="app-version">4.2</span> · <span id="install-state-text">Funciona sin conexión una vez instalada</span></div>
         </div>
     </footer>
 
     <!-- LOGICA JAVASCRIPT UNIFICADA -->
     <script>
-        const APP_VERSION = '4.1';
+        const APP_VERSION = '4.2';
 
         const poesData = [
             {
@@ -922,6 +955,7 @@
 
         /* PWA DEFERRED PROMPT */
         let deferredPrompt = null;
+        let installBarDismissed = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('app-version').textContent = APP_VERSION;
@@ -933,10 +967,17 @@
             initKitCheckboxes();
             applyHashSection();
             updateNetworkPill();
+            try { installBarDismissed = sessionStorage.getItem('prrd_install_dismissed') === '1'; } catch (e) {}
             refreshInstallUI();
             window.addEventListener('hashchange', applyHashSection);
             window.addEventListener('online', updateNetworkPill);
             window.addEventListener('offline', updateNetworkPill);
+
+            // Si el usuario instala la app desde el menú del navegador, la interfaz se actualiza sola.
+            const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+            if (typeof standaloneQuery.addEventListener === 'function') {
+                standaloneQuery.addEventListener('change', refreshInstallUI);
+            }
 
             // Manejo de tecla ESC para modales
             document.addEventListener('keydown', (e) => {
@@ -979,18 +1020,41 @@
             const btn = document.getElementById('btn-install-app');
             const lbl = document.getElementById('lbl-install');
             const stateText = document.getElementById('install-state-text');
+            const bar = document.getElementById('install-bar');
+            const body = document.body;
+
             if (isStandalone()) {
                 btn.classList.add('hidden');
+                btn.classList.remove('flex');
                 stateText.textContent = 'App instalada en este dispositivo · funciona sin conexión';
-            } else {
-                btn.classList.remove('hidden');
-                lbl.textContent = deferredPrompt ? 'Instalar app' : 'Cómo instalar';
-                if (deferredPrompt) {
-                    btn.classList.add('animate-bounce');
-                } else {
-                    btn.classList.remove('animate-bounce');
-                }
+                bar.classList.add('hidden');
+                body.classList.remove('pb-28');
+                return;
             }
+
+            btn.classList.remove('hidden');
+            btn.classList.add('flex');
+            lbl.textContent = deferredPrompt ? 'Instalar app' : 'Cómo instalar';
+            stateText.textContent = 'Instálala para usarla sin conexión';
+            if (deferredPrompt) {
+                btn.classList.add('animate-bounce');
+            } else {
+                btn.classList.remove('animate-bounce');
+            }
+
+            if (!installBarDismissed) {
+                bar.classList.remove('hidden');
+                body.classList.add('pb-28');
+            } else {
+                bar.classList.add('hidden');
+                body.classList.remove('pb-28');
+            }
+        }
+
+        function dismissInstallBar() {
+            installBarDismissed = true;
+            try { sessionStorage.setItem('prrd_install_dismissed', '1'); } catch (e) {}
+            refreshInstallUI();
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -1007,9 +1071,10 @@
 
         async function handleInstallClick() {
             if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
+                const promptEvent = deferredPrompt;
                 deferredPrompt = null;
+                promptEvent.prompt();
+                const { outcome } = await promptEvent.userChoice;
                 if (outcome === 'accepted') {
                     showToast('Instalando la app...', 'success');
                 } else {
@@ -1451,8 +1516,12 @@
             actionCooldownUntil = Date.now() + ACTION_COOLDOWN_MS;
         }
 
+        // Sin estado seleccionado NO se afirma que la persona está a salvo:
+        // se envía un aviso neutro con la ubicación.
         function statusLabel(status) {
-            return status === 'help' ? '¡NECESITO AYUDA EN EL ÁREA!' : 'Estoy a salvo en la Zona de Seguridad';
+            if (status === 'help') return '¡NECESITO AYUDA EN EL ÁREA!';
+            if (status === 'safe') return 'Estoy a salvo en la Zona de Seguridad';
+            return 'Envío mi ubicación actual (estado sin confirmar)';
         }
 
         function buildStatusMessage(statusText) {
@@ -1534,7 +1603,6 @@
             if (isOnCooldown()) return;
             const phone = getValidatedPhone();
             if (!phone) return;
-            // Usa el estado real seleccionado; antes enviaba siempre "estoy a salvo".
             const msg = await confirmStatusMessage(phone, statusLabel(currentStatus));
             if (!msg) { showToast("Envío cancelado"); return; }
             startCooldown();
@@ -1771,8 +1839,7 @@
                     showToast("Estado actualizado: A SALVO", "success");
                     announceToScreenReader("Tu estado se actualizó a: estoy a salvo.");
                 }
-                btnCall.classList.add('hidden');
-                btnCall.classList.remove('flex');
+                btnCall.className = 'hidden px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition items-center justify-center gap-2 animate-pulse';
                 globalBanner.className = 'no-print flex border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold bg-emerald-950/60 text-emerald-300';
                 setIcon(globalIcon, 'shield-heart');
                 globalText.textContent = 'Estado Operativo: Estoy a Salvo';
@@ -1783,16 +1850,15 @@
                     showToast("Estado actualizado: NECESITO AYUDA", "error");
                     announceToScreenReader("Tu estado se actualizó a: necesito ayuda.");
                 }
-                btnCall.classList.remove('hidden');
-                btnCall.classList.add('flex');
+                btnCall.className = 'flex px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition items-center justify-center gap-2 animate-pulse';
                 globalBanner.className = 'no-print flex border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold bg-red-950/70 text-red-300 animate-pulse';
                 setIcon(globalIcon, 'hand-holding-medical');
                 globalText.textContent = 'Estado Operativo: NECESITO AYUDA';
             } else {
                 btnSafe.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow';
                 btnHelp.className = 'flex-1 sm:flex-none px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-bold text-xs transition flex items-center justify-center gap-2';
-                btnCall.classList.add('hidden');
-                globalBanner.classList.add('hidden');
+                btnCall.className = 'hidden px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition items-center justify-center gap-2 animate-pulse';
+                globalBanner.className = 'no-print hidden border-t border-slate-800/80 px-3 sm:px-4 py-1.5 items-center gap-2 text-xs font-bold';
             }
 
             if (status) {
@@ -1800,8 +1866,8 @@
                     btn.disabled = false;
                     btn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
                 });
-                btnShareSms.classList.add('bg-chileBlue', 'hover:bg-blue-600', 'text-white');
-                btnShareWa.classList.add('bg-emerald-600', 'hover:bg-emerald-500', 'text-white');
+                btnShareSms.className = 'px-3 py-2 rounded-lg bg-chileBlue hover:bg-blue-600 text-white font-bold text-xs transition flex items-center justify-center gap-2';
+                btnShareWa.className = 'px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2';
                 shareHint.textContent = 'Listo para notificar a tu contacto registrado.';
             } else {
                 [btnShareSms, btnShareWa].forEach(btn => {
@@ -1818,18 +1884,48 @@
         };
     </script>
 
-    <!-- REGISTRO DEL SERVICE WORKER -->
+    <!-- REGISTRO DEL SERVICE WORKER (habilita instalación y modo sin conexión) -->
     <script>
         if ('serviceWorker' in navigator) {
+            let waitingWorker = null;
+            let reloadingByUpdate = false;
+
+            function showUpdateBanner(worker) {
+                waitingWorker = worker;
+                const banner = document.getElementById('update-banner');
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('btn-update-now');
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        if (waitingWorker) {
+                            waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+                        } else {
+                            window.location.reload();
+                        }
+                    });
+                }
+            });
+
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (reloadingByUpdate) return;
+                reloadingByUpdate = true;
+                window.location.reload();
+            });
+
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
                     .then((reg) => {
+                        if (reg.waiting) showUpdateBanner(reg.waiting);
                         reg.addEventListener('updatefound', () => {
                             const nuevo = reg.installing;
                             if (!nuevo) return;
                             nuevo.addEventListener('statechange', () => {
                                 if (nuevo.state === 'installed' && navigator.serviceWorker.controller) {
-                                    showToast('Hay una versión nueva. Cierra y vuelve a abrir la app.', 'info');
+                                    showUpdateBanner(nuevo);
                                 }
                             });
                         });

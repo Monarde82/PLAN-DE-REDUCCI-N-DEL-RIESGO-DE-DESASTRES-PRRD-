@@ -21,8 +21,7 @@
     { "src": "./icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
     }
-  ],
-  "shortcuts": [
+ "shortcuts": [
     {
       "name": "Panel SOS y estado",
       "short_name": "SOS",

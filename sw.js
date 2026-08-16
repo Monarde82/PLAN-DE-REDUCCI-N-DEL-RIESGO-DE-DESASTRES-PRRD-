@@ -9,14 +9,19 @@ const CORE_CACHE = CACHE_VERSION + '-core';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 
 /* Archivos propios: si uno falla, la instalación completa falla, por eso van aparte. */
+const CACHE_VERSION = 'prrd-poe-v5';
+
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.json',
+  './manifest.json'
+];
+
+const OPTIONAL_ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/icon-192-maskable.png',
+  './icons/icon-512-maskable.png'
 ];
 
 /* Recursos externos (Tailwind y la tipografía). Se cachean sin 'no-cors' para

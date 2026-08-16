@@ -1,40 +1,43 @@
-/* =========================================================
+/* ============================================================================
    PRRD & POE App - Service Worker
-   v6 · Funcionamiento sin conexión en PC y celular
+   Hace que la app se pueda instalar y funcione sin conexión en PC y celular.
+   Sube CACHE_VERSION cada vez que edites index.html para forzar la actualización.
+   ============================================================================ */
 
-   Cambio respecto a v5: la instalación ya no se aborta si falta
-   un archivo (por ejemplo, un ícono guardado en otra carpeta).
-   Solo index.html es obligatorio; el resto se guarda si existe.
-   ========================================================= */
+const CACHE_VERSION = 'prrd-poe-v4';
+const CORE_CACHE = CACHE_VERSION + '-core';
+const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 
-const CACHE_VERSION = 'prrd-poe-v6';
-const CACHE_RUNTIME = 'prrd-poe-runtime-v6';
-
-/* Lo único imprescindible para que la app abra sin conexión. */
-const CORE_REQUIRED = './index.html';
-
-/* Deseables: se intentan uno por uno y ninguno bloquea la instalación.
-   Se listan las dos rutas posibles de los íconos (raíz y carpeta icons/),
-   así funciona estén donde estén. */
-const OPTIONAL_ASSETS = [
+/* Archivos propios: si uno falla, la instalación completa falla, por eso van aparte. */
+const CORE_ASSETS = [
   './',
+  './index.html',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-512.png',
+  './icons/apple-touch-icon.png'
+];
+
+/* Recursos externos (Tailwind y la tipografía). Se cachean sin 'no-cors' para
+   poder verificar la respuesta; si el CDN falla, la app igual se instala. */
+const EXTERNAL_ASSETS = [
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_VERSION);
-    await cache.add(new Request(CORE_REQUIRED, { cache: 'reload' }));
-    await Promise.all(OPTIONAL_ASSETS.map(url =>
-      cache.add(new Request(url, { cache: 'reload' })).catch(() => null)
-    ));
-    self.skipWaiting();
+    const cache = await caches.open(CORE_CACHE);
+    await cache.addAll(CORE_ASSETS);
+    await Promise.allSettled(
+      EXTERNAL_ASSETS.map(async (url) => {
+        try {
+          const res = await fetch(url, { cache: 'reload' });
+          if (res && res.ok) await cache.put(url, res.clone());
+        } catch (e) { /* sin conexión al instalar: se cachea luego en runtime */ }
+      })
+    );
   })());
 });
 
@@ -42,59 +45,76 @@ self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
     await Promise.all(
-      keys.filter(k => k !== CACHE_VERSION && k !== CACHE_RUNTIME)
-          .map(k => caches.delete(k))
+      keys.filter(k => k !== CORE_CACHE && k !== RUNTIME_CACHE).map(k => caches.delete(k))
     );
+    if (self.registration.navigationPreload) {
+      try { await self.registration.navigationPreload.enable(); } catch (e) {}
+    }
     await self.clients.claim();
   })());
 });
 
+/* La página pide activar la versión nueva cuando el usuario toca "Actualizar ahora". */
 self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
-/* Navegación: red primero (para traer cambios), caché si no hay señal. */
-async function handleNavigation(request) {
-  try {
-    const fresh = await fetch(request);
-    const cache = await caches.open(CACHE_VERSION);
-    cache.put('./index.html', fresh.clone());
-    return fresh;
-  } catch (e) {
-    const cached = await caches.match('./index.html', { ignoreSearch: true });
-    return cached || new Response(
-      '<h1>Sin conexión</h1><p>Abre la app una vez con internet para guardarla en este dispositivo.</p>',
-      { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 503 }
-    );
-  }
-}
-
-/* Estáticos: caché primero y actualización en segundo plano. */
-async function handleAsset(request) {
-  const cached = await caches.match(request, { ignoreVary: true });
-  const network = fetch(request).then(async (response) => {
-    if (response && (response.ok || response.type === 'opaque')) {
-      const cache = await caches.open(CACHE_RUNTIME);
-      cache.put(request, response.clone());
-    }
-    return response;
-  }).catch(() => null);
-
-  return cached || (await network) || new Response('', { status: 504 });
-}
-
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
+  const req = event.request;
 
-  // Solo GET: los enlaces tel:, sms: y whatsapp no pasan por aquí.
-  if (request.method !== 'GET') return;
-  const url = new URL(request.url);
+  if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+
+  /* Nunca interceptar tel:, sms:, mailto: ni esquemas de extensiones. */
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
 
-  if (request.mode === 'navigate') {
-    event.respondWith(handleNavigation(request));
+  /* Navegación (abrir la app): red primero, y si no hay, el index cacheado. */
+  if (req.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const preload = await event.preloadResponse;
+        if (preload) return preload;
+        const fresh = await fetch(req);
+        const cache = await caches.open(CORE_CACHE);
+        cache.put('./index.html', fresh.clone());
+        return fresh;
+      } catch (e) {
+        const cached = await caches.match('./index.html', { ignoreSearch: true });
+        return cached || Response.error();
+      }
+    })());
     return;
   }
 
-  event.respondWith(handleAsset(request));
+  /* Resto de recursos: caché primero, con actualización silenciosa en segundo plano. */
+  event.respondWith((async () => {
+    const cached = await caches.match(req, { ignoreSearch: false });
+    if (cached) {
+      event.waitUntil((async () => {
+        try {
+          const fresh = await fetch(req);
+          if (fresh && fresh.ok) {
+            const cache = await caches.open(RUNTIME_CACHE);
+            await cache.put(req, fresh.clone());
+          }
+        } catch (e) {}
+      })());
+      return cached;
+    }
+
+    try {
+      const fresh = await fetch(req);
+      if (fresh && fresh.ok && (url.origin === self.location.origin || EXTERNAL_ASSETS.some(a => req.url.startsWith(a.split('?')[0])))) {
+        const cache = await caches.open(RUNTIME_CACHE);
+        cache.put(req, fresh.clone());
+      }
+      return fresh;
+    } catch (e) {
+      const fallback = await caches.match('./index.html');
+      return fallback || Response.error();
+    }
+  })());
 });
